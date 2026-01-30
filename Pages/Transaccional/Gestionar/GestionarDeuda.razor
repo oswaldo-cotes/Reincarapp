@@ -1,0 +1,136 @@
+@page "/gestionar-deuda"
+
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@* @using System.Reflection
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using Newtonsoft.Json
+@using Radzen
+@using Radzen.Blazor *@
+
+<PageTitle>GestionarDeuda</PageTitle>
+<RadzenRow Gap="30" >
+    <RadzenColumn Size="4">
+        <RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));height: 700px; overflow-y: auto;">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Informacion</strong></RadzenText>
+            <RadzenRow RowGap="0">
+
+                @foreach (var value in values)
+                {
+                    foreach (var v in value)
+                    {
+
+                        <RadzenColumn SizeSM="6">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">@(v.Key)</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(v.Value)</b></RadzenText>
+                        </RadzenColumn>
+
+                       @*  <RadzenDataGridColumn TItem="IDictionary<string, object>" Title="@v.Key">
+                            <Template>
+                                @(v.Value)
+                            </Template>
+                        </RadzenDataGridColumn> *@
+                    }
+
+                }
+
+
+                @* @foreach (PropertyInfo prop in registro.ClienteDeudaDatos.ToList()[0].GetType().GetProperties())
+                {
+                    <RadzenColumn SizeSM="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">@(prop.Name)</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(prop.GetValue(registro, null) == null ? "" : prop.GetValue(registro, null).ToString())</b></RadzenText>
+                    </RadzenColumn>
+                } *@
+
+            </RadzenRow>
+        </RadzenCard>
+    </RadzenColumn>
+
+    <RadzenColumn Size="8">
+
+         <RadzenTabs  RenderMode="TabRenderMode.Server" >
+            <Tabs>
+                <RadzenTabsItem Text="Gestiones" >
+                    <Template>
+                        <RadzenText Text="Gestiones"></RadzenText>
+                        @* <RadzenButton Icon="add_circle_outline" Disabled="@addEvento" Click="@(args => { addEvento = !addEvento; size = addEvento ? 4 : 6; })" Variant="Variant.Flat" Style="margin-bottom: 10px;"/> *@
+                    </Template>
+                    <ChildContent>
+                        <Reincarapp.Pages.Transaccional.Gestionar.Evento.Eventos ClienteDeudaId="@ClienteDeudaId" IdNegocio="@IdNegocio" EnabledDisabledParent="@ChildFiredEvent" />
+                    </ChildContent>
+                    
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Tareas">
+                    <Reincarapp.Pages.Transaccional.Gestionar.Tareas.Tareas ClienteDeudaId="@ClienteDeudaId" />
+                </RadzenTabsItem>
+
+            </Tabs>
+          </RadzenTabs>
+            
+
+    </RadzenColumn>
+
+   @*  <RadzenColumn Size="@size" Visible="@addEvento">
+
+        <Reincarapp.Pages.Transaccional.Gestionar.Evento.AddEvento ClienteDeudaId="@ClienteDeudaId" IdNegocio="@IdNegocio" ></Reincarapp.Pages.Transaccional.Gestionar.Evento.AddEvento>
+
+    </RadzenColumn> *@
+
+   @*  <RadzenColumn Size="4">
+       <Reincarapp.Pages.Transaccional.Gestionar.Evento.Eventos ClienteDeudaId="@ClienteDeudaId" IdNegocio ="@IdNegocio" EnabledDisabledParent="@ChildFiredEvent" />
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <Reincarapp.Pages.Transaccional.Gestionar.Tareas.Tareas ClienteDeudaId="@ClienteDeudaId" />
+    </RadzenColumn> *@
+</RadzenRow>
+
+
+
+@code {
+
+    [Parameter]
+    public Models.reincardb.ClienteDeuda registro { get; set; }
+
+    long ClienteDeudaId = 0;
+    string IdNegocio = "";
+
+    List<Dictionary<string, object>> values = new List<Dictionary<string, object>>();
+
+    int size = 6;
+    bool addEvento = false;
+
+    async void ChildFiredEvent(Reincarapp.Models.reincardb.DatoPersona persona)
+    {
+
+        addEvento = false;
+
+        this.StateHasChanged();
+        //AddDialog = false;
+
+        // dialogService.Close();
+        // registros = await ctxEsp.GetPD(decimal.Parse(ParentId));
+        // await grid.Reload();
+        // this.StateHasChanged();
+
+        // EnabledDisabledParent(true);
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        ClienteDeudaId = registro.Id_Cliente_Deuda; //long.Parse(registro.GetType().GetProperty("id_cliente_deuda").GetValue(registro, null).ToString());
+
+        values.Add(JsonConvert.DeserializeObject<Dictionary<string, object>>(registro.ClienteDeudaDato.ToList()[0].Dato));
+
+        return base.OnInitializedAsync();
+    }
+
+}

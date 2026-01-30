@@ -1,0 +1,133 @@
+@page "/cliente-deuda"
+@using Microsoft.AspNetCore.Authorization
+@using Radzen
+@using Radzen.Blazor
+
+
+@attribute [Authorize]
+
+<PageTitle>ClienteDeuda</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="ClienteDeuda" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+               @*  <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" /> *@
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal">
+
+        @* <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" /> *@
+
+        <RadzenDropDownDataGrid Data="@clientesForIdCliente" TextProperty="Nombre_Cliente" ValueProperty="Id_Cliente" AllowClear=true
+                          style="display: block; width: 50%" @bind-Value="@IdCliente" Name="IdCliente" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                           />
+
+        <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%"  @bind-Value="@searchValue" />
+        <RadzenButton Icon="search" Text="Buscar" Click="@AddButtonClick" Variant="Variant.Flat" IsBusy="@isBusy" BusyText="Buscando..." />
+
+    </RadzenStack>
+    
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@clienteDeuda" TItem="Reincarapp.Models.reincardb.ClienteDeuda" RowDoubleClick="@EditRow" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" row >
+            <Columns>
+              
+     
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="EstadoClienteDeudum.Nombre_Estado" Title="Estado Cliente Deudum" Width="100%">
+                    <Template Context="order" >
+
+                            <RadzenCard Style="width: 500px;" class="rz-border-radius-3">
+                                <RadzenRow Gap="0.5rem">
+                                    <RadzenColumn Size="8" class="rz-text-truncate">
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text=@($"{order.Id_Cliente_Deuda}") class="rz-me-1" IsPill="true" />
+                                        <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-0">@(order.Cliente?.Nombre_Cliente)</RadzenText>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="4" class="rz-text-align-end">
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" Text=@($"{String.Format(new System.Globalization.CultureInfo("en-US"), "{0:C}", order.Monto)}") IsPill="true" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <hr style="border: none; background-color: rgba(0,0,0,.08); height: 1px; margin: 1rem 0;" />
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                                     @* <RadzenImage Path="@order.Employee?.Photo" class="rz-border-radius-10" Style="width: 80px; height: 80px;" AlternateText="@(order.Employee?.FirstName + " " + order.Employee?.LastName)" />  *@
+                                    <RadzenStack Gap="0">
+                                        <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-0"><strong>@(order.Persona?.Nombre_Persona )</strong></RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body2" class="rz-mb-0">@($"Mejor Gestion en el mes: {GetMejorGestion(order)}")</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body2" class="rz-mb-0">@($"Ultima Gestion en el mes: {GetUltimaGestion(order)}")</RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+
+                    </Template>
+
+                       
+
+
+
+
+                </RadzenDataGridColumn>
+             @*    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda"  Title="GEstiones en el mes">
+                    <Template>
+                        @context.Eventos.Count().ToString()
+                    </Template>
+                </RadzenDataGridColumn> *@
+               @*  <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Cliente.Nombre_Cliente" Title="Cliente">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Persona.Nombre_Persona" Title="Persona">
+                </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Persona.Numero_Documento" Title="Persona">
+                    </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Monto" Title="Monto">
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="ResultadoEvento1.Nombre_Resultado_Evento" Title="Ultima Gestion" Width="400px">
+                    <Template>
+                            @(context.ResultadoEvento1?.Nombre_Resultado_Evento == null ? "Sin Gestion" : context.ResultadoEvento1?.Nombre_Resultado_Evento)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="ResultadoEvento.Nombre_Resultado_Evento" Title="Mejor Gestion">
+
+                        <Template>
+                            @(context.ResultadoEvento?.Nombre_Resultado_Evento == null ? "Sin Gestion" : context.ResultadoEvento?.Nombre_Resultado_Evento)
+                        </Template>
+
+                </RadzenDataGridColumn> *@
+              @*   <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Fecha_Inicio_Deuda" Title="Fecha Inicio Deuda">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Fecha_Cierre_Deuda" Title="Fecha Cierre Deuda">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Fecha_Creacion" Title="Fecha Creacion">
+                </RadzenDataGridColumn> *@
+      @*           <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Usuario.Cargo" Title="Usuario">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Usuario1.Cargo" Title="Usuario1">
+                </RadzenDataGridColumn> *@
+           @*      <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Asignacion.Descripcion" Title="Asignacion">
+                </RadzenDataGridColumn> *@
+             @*    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Numero_Documento" Title="Numero Documento">
+                    </RadzenDataGridColumn>*@
+                   
+              @*   <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="clienteDeudum">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                            Shade="Shade.Lighter" Variant="Variant.Flat"
+                            Click=@(args => GridDeleteButtonClick(args, clienteDeudum)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn> *@
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>
