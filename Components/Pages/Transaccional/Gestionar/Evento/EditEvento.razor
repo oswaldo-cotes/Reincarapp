@@ -1,0 +1,380 @@
+@page "/edit-evento"
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+
+<PageTitle>Edit Evento</PageTitle>
+<RadzenRow>
+    <RadzenColumn SizeMD="9">
+    <RadzenLabel style="font-weight: bold" Text="Item no longer available." Visible="@(!canEdit)" />
+    </RadzenColumn>
+    <RadzenColumn SizeMD="3">
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" style="margin-bottom: 20px" Text="Close" Visible="@(!canEdit)" Click="@CancelButtonClick" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow>
+    <RadzenColumn SizeMD="9">
+    <RadzenLabel style="font-weight: bold" Text="Another user has made conflicting changes to one or more of the fields you have modified. Please reload." Visible="@hasChanges" />
+    </RadzenColumn>
+    <RadzenColumn SizeMD="3">
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="autorenew" style="margin-bottom: 20px" Text="Reload" Visible="@hasChanges" Click="@ReloadButtonClick" />
+    </RadzenColumn>
+</RadzenRow>
+
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Evento</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Evento" Data="@evento" Visible="@(evento != null && canEdit)" Submit="@FormSubmit">
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Fecha Realizacion Evento" Component="Fecha_Realizacion_Evento" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@evento.Fecha_Realizacion_Evento" Name="Fecha_Realizacion_Evento" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Texto Evento" Component="Texto_Evento" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@evento.Texto_Evento" Name="Texto_Evento" />
+                    <RadzenRequiredValidator Component="Texto_Evento" Text="Texto_Evento is required" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Monto" Component="Monto" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@evento.Monto" Name="Monto" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Fecha Creacion Evento" Component="Fecha_Creacion_Evento" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@evento.Fecha_Creacion_Evento" Name="Fecha_Creacion_Evento" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Id Negocio Cliente" Component="Id_Negocio_Cliente" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@evento.Id_Negocio_Cliente" Name="Id_Negocio_Cliente" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Id Dato Persona Nuevo" Component="Id_Dato_Persona_Nuevo" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@evento.Id_Dato_Persona_Nuevo" Name="Id_Dato_Persona_Nuevo" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Fecha Creacion Registro" Component="Fecha_Creacion_Registro" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@evento.Fecha_Creacion_Registro" Name="Fecha_Creacion_Registro" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional" Component="ClasificacionAdicional" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdActividadLaboral" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional" style="display: block; width: 100%" @bind-Value="@evento.Id_Actividad_Laboral" Name="Id_Actividad_Laboral"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional1" Component="ClasificacionAdicional1" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdClasificacionAdicional" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional1" style="display: block; width: 100%" @bind-Value="@evento.Id_Clasificacion_Adicional" Name="Id_Clasificacion_Adicional"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional2" Component="ClasificacionAdicional2" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdClasificacionAdicional1" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional2" style="display: block; width: 100%" @bind-Value="@evento.Id_Clasificacion_Adicional_1" Name="Id_Clasificacion_Adicional_1"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional3" Component="ClasificacionAdicional3" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdClasificacionAdicional2" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional3" style="display: block; width: 100%" @bind-Value="@evento.Id_Clasificacion_Adicional_2" Name="Id_Clasificacion_Adicional_2"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Cliente Deudum" Component="ClienteDeudum" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clienteDeudaForIdClienteDeuda" TextProperty="campana_reparto" ValueProperty="Id_Cliente_Deuda" AllowClear=true
+                         Placeholder="Choose ClienteDeudum" style="display: block; width: 100%" @bind-Value="@evento.Id_Cliente_Deuda" Name="Id_Cliente_Deuda"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Dato Persona" Component="DatoPersona" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@datoPersonasForIdDatoPersona" TextProperty="Tipo_Via_Num_2" ValueProperty="Id_Dato_Persona" AllowClear=true
+                         Placeholder="Choose DatoPersona" style="display: block; width: 100%" @bind-Value="@evento.Id_Dato_Persona" Name="Id_Dato_Persona"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional4" Component="ClasificacionAdicional4" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdMarca" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional4" style="display: block; width: 100%" @bind-Value="@evento.Id_Marca" Name="Id_Marca"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional5" Component="ClasificacionAdicional5" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdMedioDePago" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional5" style="display: block; width: 100%" @bind-Value="@evento.Id_Medio_De_Pago" Name="Id_Medio_De_Pago"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Municipio" Component="Municipio" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@municipiosForIdMunicipio" TextProperty="Nombre_Municipio" ValueProperty="Id_Municipio" AllowClear=true
+                         Placeholder="Choose Municipio" style="display: block; width: 100%" @bind-Value="@evento.Id_Municipio" Name="Id_Municipio"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional6" Component="ClasificacionAdicional6" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdRazonMora" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional6" style="display: block; width: 100%" @bind-Value="@evento.Id_Razon_Mora" Name="Id_Razon_Mora"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional7" Component="ClasificacionAdicional7" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdRazonesPosibleExtracto" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional7" style="display: block; width: 100%" @bind-Value="@evento.Id_Razones_Posible_Extracto" Name="Id_Razones_Posible_Extracto"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Resultado Evento" Component="ResultadoEvento" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@resultadoEventosForIdResultadoEvento" TextProperty="Id_Negocio_Cliente" ValueProperty="Id_Resultado_Evento" AllowClear=true
+                         Placeholder="Choose ResultadoEvento" style="display: block; width: 100%" @bind-Value="@evento.Id_Resultado_Evento" Name="Id_Resultado_Evento"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Tarea" Component="Tarea" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@tareasForIdTarea" TextProperty="Texto_Tarea" ValueProperty="Id_Tarea" AllowClear=true
+                         Placeholder="Choose Tarea" style="display: block; width: 100%" @bind-Value="@evento.Id_Tarea" Name="Id_Tarea"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Tipo Comunicacion" Component="TipoComunicacion" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@tipoComunicacionsForIdTipoComunicacion" TextProperty="Id_Negocio_Cliente" ValueProperty="Id_Tipo_Comunicacion" AllowClear=true
+                         Placeholder="Choose TipoComunicacion" style="display: block; width: 100%" @bind-Value="@evento.Id_Tipo_Comunicacion" Name="Id_Tipo_Comunicacion"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional8" Component="ClasificacionAdicional8" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdTipoVivienda2" TextProperty="dato_adicional_3" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional8" style="display: block; width: 100%" @bind-Value="@evento.Id_Tipo_Vivienda2" Name="Id_Tipo_Vivienda2"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Usuario" Component="Usuario" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuario" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                         Placeholder="Choose Usuario" style="display: block; width: 100%" @bind-Value="@evento.Id_Usuario" Name="Id_Usuario"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Usuario1" Component="Usuario1" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuarioEvento" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                         Placeholder="Choose Usuario1" style="display: block; width: 100%" @bind-Value="@evento.Id_Usuario_Evento" Name="Id_Usuario_Evento"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+          <RadzenStack  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+
+    [Parameter]
+    public long Id_Evento { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        evento = await reincardbService.GetEventoByIdEvento(Id_Evento);
+
+        clasificacionAdicionalsForIdActividadLaboral = await reincardbService.GetClasificacionAdicional();
+
+        clasificacionAdicionalsForIdClasificacionAdicional = await reincardbService.GetClasificacionAdicional();
+
+        clasificacionAdicionalsForIdClasificacionAdicional1 = await reincardbService.GetClasificacionAdicional();
+
+        clasificacionAdicionalsForIdClasificacionAdicional2 = await reincardbService.GetClasificacionAdicional();
+
+        clienteDeudaForIdClienteDeuda = await reincardbService.GetClienteDeuda();
+
+        datoPersonasForIdDatoPersona = await reincardbService.GetDatoPersona();
+
+        clasificacionAdicionalsForIdMarca = await reincardbService.GetClasificacionAdicional();
+
+        clasificacionAdicionalsForIdMedioDePago = await reincardbService.GetClasificacionAdicional();
+
+        municipiosForIdMunicipio = await reincardbService.GetMunicipio();
+
+        clasificacionAdicionalsForIdRazonMora = await reincardbService.GetClasificacionAdicional();
+
+        clasificacionAdicionalsForIdRazonesPosibleExtracto = await reincardbService.GetClasificacionAdicional();
+
+        resultadoEventosForIdResultadoEvento = await reincardbService.GetResultadoEvento();
+
+        tareasForIdTarea = await reincardbService.GetTarea();
+
+        tipoComunicacionsForIdTipoComunicacion = await reincardbService.GetTipoComunicacion();
+
+        clasificacionAdicionalsForIdTipoVivienda2 = await reincardbService.GetClasificacionAdicional();
+
+        usuariosForIdUsuario = await reincardbService.GetUsuario();
+
+        usuariosForIdUsuarioEvento = await reincardbService.GetUsuario();
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.Evento evento;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdActividadLaboral;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdClasificacionAdicional;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdClasificacionAdicional1;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdClasificacionAdicional2;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClienteDeuda> clienteDeudaForIdClienteDeuda;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.DatoPersona> datoPersonasForIdDatoPersona;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdMarca;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdMedioDePago;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Municipio> municipiosForIdMunicipio;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdRazonMora;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdRazonesPosibleExtracto;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ResultadoEvento> resultadoEventosForIdResultadoEvento;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Tarea> tareasForIdTarea;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.TipoComunicacion> tipoComunicacionsForIdTipoComunicacion;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdTipoVivienda2;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuario;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuarioEvento;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            await reincardbService.UpdateEvento(Id_Evento, evento);
+            DialogService.Close(evento);
+        }
+        catch (Exception ex)
+        {
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        DialogService.Close(null);
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+
+
+    protected async Task ReloadButtonClick(MouseEventArgs args)
+    {
+       reincardbService.Reset();
+        hasChanges = false;
+        canEdit = true;
+
+        evento = await reincardbService.GetEventoByIdEvento(Id_Evento);
+    }
+}

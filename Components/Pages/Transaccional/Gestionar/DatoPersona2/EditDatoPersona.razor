@@ -1,0 +1,154 @@
+@page "/edit-dato-persona"
+@attribute [Authorize]
+
+<PageTitle>Edit DatoPersona</PageTitle>
+<RadzenRow>
+    <RadzenColumn SizeMD="9">
+    <RadzenLabel style="font-weight: bold" Text="Item no longer available." Visible="@(!canEdit)" />
+    </RadzenColumn>
+    <RadzenColumn SizeMD="3">
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" style="margin-bottom: 20px" Text="Close" Visible="@(!canEdit)" Click="@CancelButtonClick" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow>
+    <RadzenColumn SizeMD="9">
+    <RadzenLabel style="font-weight: bold" Text="Another user has made conflicting changes to one or more of the fields you have modified. Please reload." Visible="@hasChanges" />
+    </RadzenColumn>
+    <RadzenColumn SizeMD="3">
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="autorenew" style="margin-bottom: 20px" Text="Reload" Visible="@hasChanges" Click="@ReloadButtonClick" />
+    </RadzenColumn>
+</RadzenRow>
+
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save DatoPersona</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.DatoPersona" Data="@datoPersona" Visible="@(datoPersona != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Tipo Dato Persona" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipoDatoPersonasForIdTipoDatoPersona" TextProperty="Nombre_Tipo_Dato_Persona" ValueProperty="Id_Tipo_Dato_Persona" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Tipo_Dato_Persona" Name="Id_Tipo_Dato_Persona"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Persona" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@personasForIdPersona" TextProperty="Nombre_Persona" ValueProperty="Id_Persona" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Persona" Name="Id_Persona"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Departamento" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@departamentosForIdDepartamento" TextProperty="Nombre_Departamento" ValueProperty="Id_Departamento" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Departamento" Name="Id_Departamento"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Municipio" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@municipiosForIdMunicipio" TextProperty="Nombre_Municipio" ValueProperty="Id_Municipio" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Municipio" Name="Id_Municipio"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Dato" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Dato" Name="Dato" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Dato Activo" Component="Dato_Activo" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@datoPersona.Dato_Activo" Name="Dato_Activo" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenFormField Text="Zona Ubicacion" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@zonaUbicacionsForIdZonaUbicacion" TextProperty="Traduccion" ValueProperty="Id_Zona_Ubicacion" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Zona_Ubicacion" Name="Id_Zona_Ubicacion"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Tipo Vium" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipoViaForIdTipoVia" TextProperty="Tipo_Via" ValueProperty="Id_Tipo_Via" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Tipo_Via" Name="Id_Tipo_Via"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubicacion1" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@zonaUbicacionsForIdZonaUbicacion1" TextProperty="Traduccion" ValueProperty="Id_Zona_Ubicacion" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Zona_Ubicacion_1" Name="Id_Zona_Ubicacion_1"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubic" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Zona_Ubic" Name="Zona_Ubic" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubic1" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Zona_Ubic_1" Name="Zona_Ubic_1" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubicacion2" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@zonaUbicacionsForIdZonaUbicacion2" TextProperty="Traduccion" ValueProperty="Id_Zona_Ubicacion" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Zona_Ubicacion_2" Name="Id_Zona_Ubicacion_2"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubic2" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Zona_Ubic_2" Name="Zona_Ubic_2" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubicacion3" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@zonaUbicacionsForIdZonaUbicacion3" TextProperty="Traduccion" ValueProperty="Id_Zona_Ubicacion" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Zona_Ubicacion_3" Name="Id_Zona_Ubicacion_3"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Zona Ubic3" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Zona_Ubic_3" Name="Zona_Ubic_3" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Tipo Via Num1" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Tipo_Via_Num_1" Name="Tipo_Via_Num_1" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Tipo Via Num2" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@datoPersona.Tipo_Via_Num_2" Name="Tipo_Via_Num_2" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Id Evento" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@datoPersona.Id_Evento" Name="Id_Evento" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="idusuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@datoPersona.id_usuario" Name="id_usuario" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="idtarea" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@datoPersona.id_tarea" Name="id_tarea" />
+              </ChildContent>
+            </RadzenFormField>
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+

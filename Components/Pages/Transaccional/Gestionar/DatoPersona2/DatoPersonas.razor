@@ -1,0 +1,88 @@
+@page "/dato-personas"
+
+@attribute [Authorize]
+
+<PageTitle>DatoPersonas</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="DatoPersonas" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+
+        @*   RowDoubleClick="@EditRow" *@
+
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@datoPersonas" TItem="Reincarapp.Models.reincardb.DatoPersona"  RowClick="@OnRowClick" Density="Density.Compact" SelectionMode="DataGridSelectionMode.Single" @bind-Value=@selectedEmployees>
+            <Columns>
+                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="datoPersona">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="edit" Size="ButtonSize.Medium"
+                            Shade="Shade.Lighter" Variant="Variant.Flat"
+                            Click=@(args => GridDeleteButtonClick(args, datoPersona)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+                @*<RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Id_Dato_Persona" Title="Id Dato Persona">
+                </RadzenDataGridColumn>*@
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="TipoDatoPersona.Nombre_Tipo_Dato_Persona" Title="Tipo Dato Persona">
+                </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Dato" Title="Dato">
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Dato_Activo" Title="Dato Activo">
+                    </RadzenDataGridColumn>
+       @*          <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Persona.Nombre_Persona" Title="Persona">
+                </RadzenDataGridColumn> *@
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Departamento.Nombre_Departamento" Title="Departamento">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Municipio.Nombre_Municipio" Title="Municipio">
+                </RadzenDataGridColumn>
+              
+        @*         <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="ZonaUbicacion.Traduccion" Title="Zona Ubicacion">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="TipoVium.Tipo_Via" Title="Tipo Vium">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="ZonaUbicacion1.Traduccion" Title="Zona Ubicacion1">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Zona_Ubic" Title="Zona Ubic">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Zona_Ubic_1" Title="Zona Ubic1">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="ZonaUbicacion2.Traduccion" Title="Zona Ubicacion2">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Zona_Ubic_2" Title="Zona Ubic2">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="ZonaUbicacion3.Traduccion" Title="Zona Ubicacion3">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Zona_Ubic_3" Title="Zona Ubic3">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Tipo_Via_Num_1" Title="Tipo Via Num1">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Tipo_Via_Num_2" Title="Tipo Via Num2">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Id_Evento" Title="Id Evento">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="id_usuario" Title="idusuario">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="id_tarea" Title="idtarea">
+                </RadzenDataGridColumn> *@
+               
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>

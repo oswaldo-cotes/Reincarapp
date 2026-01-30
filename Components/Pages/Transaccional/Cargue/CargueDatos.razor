@@ -1,0 +1,412 @@
+﻿@page "/carguedatos"
+<h3>Cargue Base</h3>
+
+@using MatBlazor;
+@using System.IO;
+@using System.Data;
+@using MySql.Data.MySqlClient;
+
+
+@inject TodoItemService todoItemService
+
+@using System.Net.Http
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject IJSRuntime JSRuntime
+@using Microsoft.Extensions.Configuration;
+@using Reincarapp.Models.reincardb
+@using Reincarapp.Data
+@inject reincardbContext db
+@using Microsoft.EntityFrameworkCore
+
+
+<MatSelect Label="Cliente" ValueChanged="@((string s) => SelectionChangedEventCli(s))">
+    <MatOptionString Value="0">Todos</MatOptionString>
+    @foreach (var r in lstCli)
+    {
+        <MatOptionString Value="@r.Id_Cliente.ToString()">@r.Nombre_Cliente</MatOptionString>}
+</MatSelect>
+
+<MatSelect Label="Tipo de cargue" ValueChanged="@((string s) => SelectionChangedEventTip(s))">
+    @foreach (var r in tipocargues)
+    {
+        <MatOptionString Value="@r.id.ToString()">@r.nombre</MatOptionString>}
+</MatSelect>
+
+@if (idTipoCargue == "1" && cliente.Base != null)
+
+{
+
+    <MatSelect Label="Seleccione la base que quiere cargar" ValueChanged="@((string s) => SelectionChangedBase(s))">
+        @foreach (var r in cliente.Base)
+        {
+            <MatOptionString Value="@r.Id.ToString()">@r.Nombre</MatOptionString>
+        }
+    </MatSelect>
+
+}
+
+
+<MatFileUpload OnChange="@FilesReadyForContent" Label="Arrastre e archivo aqui o presione para subir"></MatFileUpload>
+@foreach (var f in list)
+{
+    <div>@f</div>
+}
+
+@*<MatProgressBar Progress="@progress"></MatProgressBar>*@
+
+<RadzenProgressBar @bind-Value="@progress" Style="margin-bottom: 20px" />
+@fileContent
+@if (ProcEnded)
+{
+
+    <MatTable Items="@errores" class="mat-elevation-z5">
+        <MatTableHeader>
+            <th>Linea</th>
+            <th>Mensaje</th>
+        </MatTableHeader>
+        <MatTableRow>
+            <td>@context.linea</td>
+            <td>@context.mensaje</td>
+        </MatTableRow>
+    </MatTable>
+
+}
+
+
+
+@code {
+
+    string idCliente = "";
+    string idBase = "";
+    ClaimsPrincipal user = new ClaimsPrincipal();
+    List<Cliente> lstCli = new List<Cliente>();
+
+    string userIdG = "";
+
+    string fileContent;
+    MemoryStream ms = new MemoryStream();
+    List<string> list = new List<string>();
+
+    Cliente cliente = new Cliente();
+
+    double progress = 0;
+
+    bool ProcEnded = false;
+
+    @*Dictionary<string, string> sps = new Dictionary<string, string>()
+        {
+                { "", "" },
+                { "", "" },
+                { "", "" }
+            };*@
+
+
+    public class Error
+    {
+        public int linea { get; set; }
+        public string mensaje { get; set; }
+    }
+
+    public class TipoCargue
+    {
+        public int id { get; set; }
+        public string nombre { get; set; }
+    }
+
+    List<Error> errores = new List<Error>();
+
+    List<TipoCargue> tipocargues = new List<TipoCargue>() {
+                                                         new TipoCargue() { id=1, nombre = "Base" }
+                                                        ,new TipoCargue() { id=2, nombre = "Gestiones" }
+                                                        ,new TipoCargue() { id=3, nombre = "Datos Personales" }
+                                                      };
+    string idTipoCargue = "1";
+    private async Task GetClaimsPrincipalData()
+    {
+        // var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        // user = authState.User;
+
+        // userIdG = user.Claims.Where(x => x.Type == ClaimTypes.Sid).FirstOrDefault().Value;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetClaimsPrincipalData();
+
+
+        // string role = user.Claims.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault().Value;
+        // string userData = user.Claims.Where(x => x.Type == ClaimTypes.UserData).FirstOrDefault().Value;
+
+        // if (role != "1")
+        //     lstCli = await Task.FromResult(db.Clientes.Where(x => userData.Contains(x.Id_Cliente.ToString()) && x.sp_ins != null).OrderBy(x => x.Nombre_Cliente).ToList());
+        // else
+        lstCli = await Task.FromResult(db.Cliente.Include(x=>x.Base)
+                                            .ThenInclude(x=>x.Basecampo)
+                                            .ThenInclude(x=>x.Campoclave)
+                                            .Where(x => x.sp_ins != null).OrderBy(x => x.Nombre_Cliente).ToList());
+
+
+
+    }
+
+    public async void SelectionChangedEventCli(string value)
+    {
+        idCliente = value;
+
+        cliente = lstCli.Where(x => x.Id_Cliente == long.Parse(idCliente)).FirstOrDefault();
+
+        //await RefreshD();
+
+    }
+
+    public async void SelectionChangedEventTip(string value)
+    {
+        idTipoCargue = value;
+
+    }
+
+    public async void SelectionChangedBase(string value)
+    {
+        idBase = value;
+
+    }
+
+
+    async Task FilesReadyForContent(IMatFileUploadEntry[] files)
+    {
+
+        MySqlCommand cmd = new MySqlCommand();
+
+        try
+        {
+            var file = files.FirstOrDefault();
+            if (file == null)
+            {
+                return;
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                await file.WriteToStreamAsync(stream);
+                ms = stream;
+                fileContent = file.Name;
+
+                DataTable dt = new DataTable();
+                Dictionary<string, DataTable> resExc = new Dictionary<string, DataTable>();
+                resExc = await todoItemService.ExcelToDataTable(null, true, ms, fileContent);
+
+
+                if (resExc.ToList()[0].Key != "OK")
+                {
+                    throw new Exception("Error al cargar archivo excel " + resExc.ToList()[0].Key);
+                    //fileContent = $"Error:\r\n{"Validacion de cargue"}\r\n{"Cliente no tiene proceso de carga"}";
+                }
+
+                if (idCliente == "")
+                {
+                    throw new Exception("Seleccione cliente para realizar cargue");
+                    //fileContent = $"Error:\r\n{"Validacion de cargue"}\r\n{"Cliente no tiene proceso de carga"}";
+                }
+
+
+
+                if (idTipoCargue == "1")
+                {
+
+
+
+                    if (cliente.sp_ins != null && cliente.sp_ins == "SP_INSERT_GENERIC")
+                    {
+
+
+                    }
+                    else
+                    {
+                        
+                        if (cliente.id_tipo_cliente == 2)
+                        {
+                            cmd = await todoItemService.GetParameters("SP_INSERT_BASE_JUR");
+                        }
+                        else if (cliente.id_tipo_cliente == 1 || cliente.id_tipo_cliente == null)
+                        {
+                            if (!string.IsNullOrEmpty(cliente.sp_ins))
+                                cmd = await todoItemService.GetParameters(cliente.sp_ins);
+                            else
+                                throw new Exception("cliente no tiene parametrizado procedimiento de cargue");
+                        }
+                    
+                    
+                    }
+
+
+
+
+                  
+                    
+
+
+                }
+
+                else if (idTipoCargue == "2")
+                {
+                    cmd = await todoItemService.GetParameters("SP_INSERT_GESTIONES");
+                }
+
+                else if (idTipoCargue == "3")
+                {
+                    cmd = await todoItemService.GetParameters("SP_INS_DATO_PER");
+                }
+
+
+
+                if (cmd.Parameters.Count == 0)
+                {
+                    throw new Exception("Cliente no tiene proceso de carga de datos");
+                    //fileContent = $"Error:\r\n{"Validacion de cargue"}\r\n{"Cliente no tiene proceso de carga"}";
+                }
+
+
+                if (cmd != null)
+                {
+
+
+                    int i = 0;
+                    int regOk = 0;
+                    int regNoOk = 0;
+
+
+                    if ((idCliente == "1" || idCliente == "20") && idTipoCargue == "1")
+                    {
+                        
+                            string asig = "ASIG_" + DateTime.Now.Month.ToString().PadLeft(1);
+
+                            if (db.Asignacion.Where(x => x.Id_Asignacion == asig).Count() == 0)
+                            {
+                                db.Asignacion.Add(new Asignacion()
+                                {
+                                        Id_Asignacion = asig,
+                                    Descripcion = asig
+                                });
+
+                                await db.SaveChangesAsync();
+
+
+                            }
+
+
+                        
+                    }
+
+                    Base _base = new Base();
+
+                    if (cliente.sp_ins == "SP_INSERT_GENERICO")
+                    {
+
+                       
+
+                            _base = await db.Base.Where(x => x.Id == long.Parse(idBase))
+                                .Include(x => x.Basecampo)
+                                .ThenInclude(x => x.Campoclave).Where(x => x.IdCliente == cliente.Id_Cliente).FirstOrDefaultAsync();
+
+                        
+
+                    }
+
+
+
+                    foreach (DataRow dr in resExc.ToList()[0].Value.Rows)
+                    {
+                        // Insertar Linea
+
+                        i++;
+
+                        string res = "OK";
+
+                        if (cliente.sp_ins == "SP_INSERT_GENERICO")
+                        {
+
+
+                            res = await todoItemService.InsertarLineaGen(cliente, cmd, dr, _base);
+
+
+
+
+                        }
+                        else
+                        {
+                            res = await todoItemService.InsertarLinea(cliente, cmd, dr, resExc.ToList()[0].Value.Columns, idTipoCargue);
+                        }
+
+                        //await Task.Delay(100);
+
+
+
+                        if (res == "OK")
+                        {
+                            regOk++;
+                        }
+
+                        else
+                        {
+                            regNoOk++;
+                            errores.Add(new Error() { linea = i, mensaje = res });
+                        }
+
+
+                        progress = Math.Round(((double)i / resExc.ToList()[0].Value.Rows.Count), 1) * 100;
+
+
+
+                        fileContent = "Total registros: "
+                            + resExc.ToList()[0].Value.Rows.Count.ToString()
+                            + ", Procesados: " + i.ToString()
+                            + ", Correctos: " + regOk.ToString()
+                            + ", Incorrectos: " + regNoOk.ToString();
+
+                        await InvokeAsync(async () => { this.StateHasChanged(); });
+
+                    }
+
+                    if (errores.Count > 0)
+                    {
+                        ProcEnded = true;
+                    }
+
+                }
+
+
+
+
+            }
+        }
+
+        catch (Exception e)
+        {
+            fileContent = $"Error General:\r\n{e.Message}\r\n{e.StackTrace.Replace("oswaldocotes", "DBX")}";
+        }
+        finally
+        {
+            try
+            {
+
+                // if (cmd.Connection.State == ConnectionState.Open)
+                //     await cmd.Connection.CloseAsync();
+
+            }
+            catch (Exception ex1) { }
+
+
+            await InvokeAsync(async () => { this.StateHasChanged(); });
+        }
+    }
+
+
+}

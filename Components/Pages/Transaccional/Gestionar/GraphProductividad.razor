@@ -1,0 +1,278 @@
+﻿@using System.Threading.Tasks
+@using System.Net.Http
+
+@using Microsoft.EntityFrameworkCore;
+@using Reincarapp.Models.MyModels
+@using Reincarapp.Models.reincardb
+
+@inject TodoItemService todoItemService
+
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+@inject SecurityService securityService
+
+@inject Reincarapp.Data.reincardbContext ctx
+
+
+<MatProgressBar Indeterminate="true" Closed="@closed"></MatProgressBar>
+
+<RadzenFieldset AllowCollapse="true">
+    <HeaderTemplate>
+        <span>
+            <RadzenIcon Icon="contact_phone" /><b style="font-size:30px">@userId.Nombre_Usuario</b>
+        </span>
+    </HeaderTemplate>
+    <ChildContent>
+        @if (compromisosVenc > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                Compromisos pendientes de dias anteriores @compromisosVenc
+            </div>
+        }
+
+        <div class="mat-layout-grid">
+            <div class="mat-layout-grid-inner">
+                <div class="@colsString">
+                    <RadzenChart Style="height:200px">
+                        <RadzenDonutSeries Title="tales" Data="@revClientes.ToArray()" CategoryProperty="Quarter" ValueProperty="Revenue">
+                            <TitleTemplate>
+                                <div class="rz-donut-content">
+                                    <div>Clientes: @revClientes.Sum(x => x.Revenue).ToString("N0")</div>
+                                </div>
+                            </TitleTemplate>
+
+                        </RadzenDonutSeries>
+                    </RadzenChart>
+
+                </div>
+                <div class="@colsString">
+                    <RadzenChart Style="height:200px">
+                        <RadzenDonutSeries Data="@revenue.ToArray()" CategoryProperty="Quarter" ValueProperty="Revenue">
+                            <TitleTemplate>
+                                <div class="rz-donut-content">
+                                    <div>Gestiones: @revenue.Sum(x => x.Revenue).ToString("N0")</div>
+                                </div>
+                            </TitleTemplate>
+                        </RadzenDonutSeries>
+                    </RadzenChart>
+                </div>
+                <div class="@colsString">
+                    <RadzenChart Style="height:200px">
+                        <RadzenDonutSeries Data="@revTareas.ToArray()" CategoryProperty="Quarter" ValueProperty="Revenue">
+                            <TitleTemplate>
+                                <div class="rz-donut-content">
+                                    <div>Compromisos: @revTareas.Sum(x => x.Revenue).ToString("N0")</div>
+                                </div>
+                            </TitleTemplate>
+                        </RadzenDonutSeries>
+                    </RadzenChart>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </ChildContent>
+</RadzenFieldset>
+
+
+
+@code {
+
+    [Parameter]
+    public Usuario userId { get; set; }
+    [Parameter]
+    public string screen { get; set; }
+    [Parameter]
+    public List<ResultadoEvento> resultadosEvento { get; set; }
+
+    List<DataItem> revenue = new List<DataItem>();
+    List<DataItem> revTareas = new List<DataItem>();
+    List<DataItem> revClientes = new List<DataItem>();
+    // List<ResultadoEvento> resultadosEvento = new List<ResultadoEvento>();
+    bool closed = false;
+    long compromisosVenc = 0;
+    string danger = "text-xs font-weight-bold text-danger text-uppercase mb-1";
+    string success = "text-xs font-weight-bold text-danger text-uppercase mb-1";
+    string compColorText;
+    Usuario usuario = new Usuario();
+
+    string colsString = "mat-layout-grid-cell mat-layout-grid-cell-span-6";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Validate required parameters
+            if (userId == null)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Usuario no válido");
+                closed = true;
+                return;
+            }
+
+            if (resultadosEvento == null)
+            {
+                resultadosEvento = new List<ResultadoEvento>();
+            }
+
+            if (screen == "gestionar")
+                colsString = "mat-layout-grid-cell mat-layout-grid-cell-span-12";
+
+            var fIni = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var lastDay = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+            var fFin = new DateTime(DateTime.Now.Year, DateTime.Now.Month, lastDay, 23, 59, 59);
+            closed = false;
+
+            try
+            {
+                // Get gestiones data
+                var tales = await todoItemService.SpGet<Valores>("SpGetGestionesCons", 
+                    new object[] { userId.Id_Usuario, DateTime.Now.ToString("yyyy-MM-dd"), DateTime.Now.ToString("yyyy-MM-dd") });
+
+                revenue.Clear();
+                revClientes.Clear();
+
+                if (tales != null)
+                {
+                    foreach (var d in tales)
+                    {
+                        try
+                        {
+                            string nResEve = "";
+                            var resultadoEvento = resultadosEvento?.FirstOrDefault(x => x.Id_Resultado_Evento == d.v2);
+                            
+                            if (resultadoEvento != null)
+                            {
+                                nResEve = resultadoEvento.Nombre_Resultado_Evento + "(" + d.v3.ToString() + ")";
+                            }
+                            else
+                            {
+                                nResEve = "Sin resultado(" + d.v3.ToString() + ")";
+                            }
+
+                            revenue.Add(new DataItem
+                            {
+                                Quarter = nResEve,
+                                Revenue = d.v3
+                            });
+
+                            revClientes.Add(new DataItem
+                            {
+                                Quarter = nResEve,
+                                Revenue = d.v4
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            NotificationService.Notify(NotificationSeverity.Warning, "Advertencia", 
+                                $"Error procesando datos de gestión: {ex.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", 
+                    $"Error obteniendo datos de gestiones: {ex.Message}");
+            }
+
+            try
+            {
+                // Get tareas data
+                var tales2 = await todoItemService.SpGet<ValoresN>("SpGetTareasCons", 
+                    new object[] { userId.Id_Usuario, DateTime.Now.ToString("yyyy-MM-dd"), DateTime.Now.ToString("yyyy-MM-dd") });
+                
+                revTareas.Clear();
+                
+                if (tales2 != null)
+                {
+                    foreach (var d in tales2)
+                    {
+                        try
+                        {
+                            revTareas.Add(new DataItem
+                            {
+                                Quarter = (d.n1 ?? "Sin nombre") + "(" + d.v2 + ")",
+                                Revenue = d.v2
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            NotificationService.Notify(NotificationSeverity.Warning, "Advertencia", 
+                                $"Error procesando datos de tarea: {ex.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", 
+                    $"Error obteniendo datos de tareas: {ex.Message}");
+            }
+
+            try
+            {
+                // Get compromisos vencidos
+                var tales3 = await todoItemService.SpGet<ValoresN>("SpGetTareasCons", 
+                    new object[] { userId.Id_Usuario, fIni.ToString("yyyy-MM-dd"), DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd") });
+                
+                if (tales3?.Count > 0)
+                {
+                    var compromisosData = tales3.Where(x => x.n1?.ToLower() == "compromiso");
+                    compromisosVenc = compromisosData?.Sum(x => x.v2) ?? 0;
+                    compColorText = danger;
+                }
+                else
+                {
+                    compromisosVenc = 0;
+                    compColorText = success;
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", 
+                    $"Error obteniendo compromisos vencidos: {ex.Message}");
+                compromisosVenc = 0;
+                compColorText = success;
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error General", 
+                $"Error inesperado al cargar datos de productividad: {ex.Message}");
+            
+            // Initialize collections to prevent null reference errors
+            revenue ??= new List<DataItem>();
+            revTareas ??= new List<DataItem>();
+            revClientes ??= new List<DataItem>();
+            compromisosVenc = 0;
+            compColorText = success;
+        }
+        finally
+        {
+            closed = true;
+            StateHasChanged();
+        }
+    }
+
+
+}
+
+

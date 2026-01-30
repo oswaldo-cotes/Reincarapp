@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Reincarapp.Pages.Transaccional.Gestionar.ClienteDeuda
+namespace Reincarapp.Components.Pages.Transaccional.Gestionar.ClienteDeuda
 {
     public partial class ClienteDeuda
     {

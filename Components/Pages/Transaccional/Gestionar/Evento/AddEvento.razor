@@ -1,0 +1,612 @@
+@page "/add-evento"
+
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+@inject SecurityService securityService
+
+@inject Reincarapp.Data.reincardbContext ctx
+@using Microsoft.EntityFrameworkCore.Storage;
+
+<PageTitle>Add Evento</PageTitle>
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Evento @errorMessage</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Evento" Data="@evento" Visible="@(evento != null && canEdit)" Submit="@FormSubmit">
+             <RadzenStack>
+
+
+
+                    <RadzenAccordion>
+                        <Items>
+                            <RadzenAccordionItem Text="@((DatoPersonaSel == null) ? "Selecciona dato persona" : (DatoPersonaSel.TipoDatoPersona == null) ? "Sin Tipo" : DatoPersonaSel.TipoDatoPersona.Nombre_Tipo_Dato_Persona + ": " + DatoPersonaSel.Dato)" Icon="account_balance_wallet" CollapseTitle="Collapse Dato Persona."
+                                                 ExpandTitle="Expand Dato Persona." CollapseAriaLabel="Collapse the Dato Persona details."
+                                         ExpandAriaLabel="Expand the Dato Persona details." @bind-Selected=@datPerTabSelected>
+                                <Reincarapp.Pages.Transaccional.Gestionar.DatoPersona2.DatoPersonas PersonaId="@ClienteDeuda.Id_Persona" EnabledDisabledParent="@ChildFiredEvent">
+
+                                </Reincarapp.Pages.Transaccional.Gestionar.DatoPersona2.DatoPersonas>
+                            </RadzenAccordionItem>
+                        </Items>
+                    </RadzenAccordion>
+            
+                    
+                    <RadzenFormField Text="" Variant="Variant.Text">
+                            <ChildContent>
+                            <RadzenDropDownDataGrid Data="@datoPersonasForIdDatoPersona" TextProperty="Dato" ValueProperty="Id_Dato_Persona" AllowClear=true
+                                    style="display: block; width: 100%" @bind-Value="@evento.Id_Dato_Persona" Name="Id_Dato_Persona" Visible = "false"
+                                    />
+                               
+                        </ChildContent>
+                        <Helper>
+                             <RadzenRequiredValidator Component="Id_Dato_Persona" Text="Dato de contacto es requerido" />
+                        </Helper>
+                    </RadzenFormField>
+     
+                      <RadzenFormField Text="Tipo Comunicacion" Variant="Variant.Text">
+                            <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipoComunicacionsForIdTipoComunicacion" TextProperty="Nombre_Tipo_Comunicacion" ValueProperty="Id_Tipo_Comunicacion" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@evento.Id_Tipo_Comunicacion" Name="Id_Tipo_Comunicacion"
+                           />
+                </ChildContent>
+                <Helper>
+                    <RadzenCustomValidator Component="Id_Tipo_Comunicacion" Validator="@(() => ValidateRequiredNumeric(evento.Id_Tipo_Comunicacion))" Text="Tipo de comunicacion es requerido" />
+                </Helper>
+            </RadzenFormField>
+           
+            <RadzenFormField Text="Resultado Evento" Variant="Variant.Text">
+                            <ChildContent>
+                    <RadzenDropDownDataGrid Data="@resultadoEventosForIdResultadoEvento" TextProperty="Nombre_Resultado_Evento" ValueProperty="Id_Resultado_Evento" AllowClear=true
+                         style="display: block; width: 100%" @bind-Value="@evento.Id_Resultado_Evento"  Change="@(args => Change(args, "ResEve"))" Name="Id_Resultado_Evento"
+                           />
+                </ChildContent>
+                <Helper>
+                    <RadzenCustomValidator Component="Id_Resultado_Evento" Validator="@(() => ValidateRequiredNumeric(evento.Id_Resultado_Evento))" Text="Tipo de comunicacion es requerido" />
+                </Helper>
+            </RadzenFormField>
+
+
+              <RadzenFormField Text="Contactado Por" Variant="Variant.Text" Visible="@EsContacto">
+                <ChildContent>
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdContactadoPor" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                                            style="display: block; width: 100%" @bind-Value="@IdContactadoPor" Name="IdContactadoPor" />
+                </ChildContent>
+                <Helper>
+                    @* <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" /> *@
+                </Helper>
+             </RadzenFormField>
+
+
+               <RadzenRow style="margin-bottom: 1rem" Visible="@EsContacto">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Autoriza Contacto" Component="AutorizaContactoText" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@AutorizaContacto" Name="AutorizaContacto" />
+                </RadzenColumn>
+                </RadzenRow>
+
+
+             
+
+
+            
+
+
+
+
+         
+
+            
+           
+           @*TODO: COntactado por detalle de evento*@
+
+            <RadzenAccordion>
+                <Items>
+                    <RadzenAccordionItem Text="Clasificaciones" Icon="account_balance_wallet" CollapseTitle="Collapse Clasificaciones."
+                                         ExpandTitle="Expand Clasificaciones." CollapseAriaLabel="Collapse the Clasificaciones details."
+                                         ExpandAriaLabel="Expand the Clasificaciones details.">
+
+                        <RadzenStack Orientation="Orientation.Vertical"  Gap="4px" >
+                            <RadzenFormField Text="Clasificacion Honorario" Variant="Variant.Text">
+                                <ChildContent>
+                                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdClasificacionAdicional" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                                                            style="display: block; width: 100%" @bind-Value="@evento.Id_Clasificacion_Adicional" Name="Id_Clasificacion_Adicional" />
+                                </ChildContent>
+                                <Helper>
+                                    @*  <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" /> *@
+                                </Helper>
+                            </RadzenFormField>
+                            <RadzenFormField Text="Marca" Variant="Variant.Text">
+                                <ChildContent>
+                                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdMarca" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                                                            style="display: block; width: 100%" @bind-Value="@evento.Id_Marca" Name="Id_Marca" />
+                                </ChildContent>
+                                <Helper>
+                                    @* <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" /> *@
+                                </Helper>
+                            </RadzenFormField>
+                            <RadzenFormField Text="Medio De Pago" Variant="Variant.Text">
+                                <ChildContent>
+                                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdMedioDePago" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                                                            style="display: block; width: 100%" @bind-Value="@evento.Id_Medio_De_Pago" Name="Id_Medio_De_Pago" />
+                                </ChildContent>
+                                <Helper>
+                                    @* <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" /> *@
+                                </Helper>
+                            </RadzenFormField>
+                            <RadzenFormField Text="Razon Mora" Variant="Variant.Text">
+                                <ChildContent>
+                                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdRazonMora" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                                                            style="display: block; width: 100%" @bind-Value="@evento.Id_Razon_Mora" Name="Id_Razon_Mora" />
+                                </ChildContent>
+                                <Helper>
+                                    @*  <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" /> *@
+                                </Helper>
+                            </RadzenFormField>
+                            <RadzenFormField Text="Razones Posible Extracto" Variant="Variant.Text">
+                                <ChildContent>
+                                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdRazonesPosibleExtracto" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                                                            style="display: block; width: 100%" @bind-Value="@evento.Id_Razones_Posible_Extracto" Name="Id_Razones_Posible_Extracto" />
+                                </ChildContent>
+                                <Helper>
+                                    @* <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" /> *@
+                                </Helper>
+                            </RadzenFormField>
+                         </RadzenStack>
+                       
+                        
+                    </RadzenAccordionItem>
+
+                   
+                </Items>
+            </RadzenAccordion>
+
+
+
+
+
+
+
+           <RadzenFormField Text="Fecha Compromiso" Variant="Variant.Text">
+                            <ChildContent>
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy hh:mm" style="display: block; width: 100%" @bind-Value="@evento.Fecha_Realizacion_Evento" Name="Fecha_Realizacion_Evento" ShowTime="true" />
+                </ChildContent>
+                <Helper>
+                    <RadzenCustomValidator Component="Fecha_Realizacion_Evento" Validator="@(() => ValidateRequiredFechaComp())" Text="Fecha De Compromiso es requerido debido a que seleccionaste un resultado que indica compromiso o recaudo futuro" />
+                </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Texto Evento" Variant="Variant.Text">
+                            <ChildContent>
+                    <RadzenTextArea style="display: block; width: 100%" @bind-Value="@evento.Texto_Evento" Name="Texto_Evento" />
+                    
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Texto_Evento" Text="Texto_Evento es requerido" />
+                </Helper>
+            </RadzenFormField>
+           <RadzenFormField Text="Monto" Variant="Variant.Text">
+                            <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@evento.Monto" Name="Monto" Format="C2"/>
+                </ChildContent>
+                <Helper>
+                    <RadzenCustomValidator Component="Monto" Validator="@(() => ValidateRequiredMonto())" Text="Monto es requerido debido a que seleccionaste un resultado que indica compromiso o recaudo" />
+                </Helper>
+            </RadzenFormField>
+           
+         
+           @*
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Actividad Laboral" Component="ClasificacionAdicional" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdActividadLaboral" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional" style="display: block; width: 100%" @bind-Value="@evento.Id_Actividad_Laboral" Name="Id_Actividad_Laboral"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+           @*
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional2" Component="ClasificacionAdicional2" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdClasificacionAdicional1" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional2" style="display: block; width: 100%" @bind-Value="@evento.Id_Clasificacion_Adicional_1" Name="Id_Clasificacion_Adicional_1"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Clasificacion Adicional3" Component="ClasificacionAdicional3" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdClasificacionAdicional2" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional3" style="display: block; width: 100%" @bind-Value="@evento.Id_Clasificacion_Adicional_2" Name="Id_Clasificacion_Adicional_2"
+                           />
+                </RadzenColumn>
+            </RadzenRow>
+        *@
+          
+            
+@*           
+      <RadzenFormField Text="Texto Tarea" Variant="Variant.Text">
+                            <ChildContent>
+                    <RadzenDropDownDataGrid Data="@clasificacionAdicionalsForIdTipoVivienda2" TextProperty="Nombre_Clasificacion_Adicional" ValueProperty="Id_Clasificacion_Adicional" AllowClear=true
+                         Placeholder="Choose ClasificacionAdicional8" style="display: block; width: 100%" @bind-Value="@evento.Id_Tipo_Vivienda2" Name="Id_Tipo_Vivienda2"
+                           />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" />
+                </Helper>
+            </RadzenFormField> *@
+        </RadzenStack>
+         
+          <RadzenStack  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+
+    [Parameter]
+    public long ClienteDeudaId { get; set; }
+
+    [Parameter]
+    public string IdNegocio { get; set; }
+
+    [Parameter]
+    public long IdTarea { get; set; }
+
+    [Parameter]
+    public Action<bool> EnabledDisabledParent { get; set; }
+
+    [Parameter]
+    public string screen { get; set; }
+
+    Reincarapp.Models.reincardb.ClienteDeuda ClienteDeuda = null;
+    Reincarapp.Models.reincardb.DatoPersona DatoPersonaSel = null;
+
+    Reincarapp.Models.reincardb.Tarea tarea = null;
+
+    bool datPerTabSelected = false;
+
+    string errorMessage = string.Empty;
+
+    long? IdContactadoPor;
+    bool AutorizaContacto = false;
+
+    bool EsCompromiso = false;
+     bool EsRecaudo = false;
+      bool EsContacto = false;
+
+      
+
+    async void Change(object value, string name)
+    {
+        var str = value is IEnumerable<object> ? string.Join(", ", (IEnumerable<object>)value) : value;
+         EsCompromiso = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.es_compromiso ?? false;
+         EsRecaudo = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.es_recaudo ?? false;
+         EsContacto = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.Es_Contacto ?? false;
+        switch (name)
+        {
+            case "ResEve":
+               
+
+               
+                break;
+        }
+            
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try { 
+
+        if (IdTarea != null && IdTarea > 0)
+
+        {
+            tarea = await reincardbService.GetTareaByIdTarea(IdTarea);
+
+        }
+
+        string strQueryClasif = "i.Id_Tipo_Clasificacion_Adicional == @0 && (i.Id_cliente == @1)";
+
+
+
+
+        //clasificacionAdicionalsForIdActividadLaboral = await reincardbService.GetClasificacionAdicional();
+
+
+
+        //clasificacionAdicionalsForIdClasificacionAdicional1 = await reincardbService.GetClasificacionAdicional();
+
+        //clasificacionAdicionalsForIdClasificacionAdicional2 = await reincardbService.GetClasificacionAdicional();
+
+        clienteDeudaForIdClienteDeuda = await reincardbService.GetClienteDeuda(new Query { Filter = $@"i => i.Id_Cliente_Deuda == @0", FilterParameters = new object[] { ClienteDeudaId },Expand="Cliente,Persona" });
+
+
+        if (clienteDeudaForIdClienteDeuda.ToList().Count > 0)
+        {
+            ClienteDeuda = clienteDeudaForIdClienteDeuda.FirstOrDefault();
+        }
+
+        usuariosForIdUsuario = await reincardbService.GetUsuario(new Query { Filter = $@"i => (i.Usuario1 == @0 || i.Correo_Electronico == @0)", FilterParameters = new object[] { securityService.User.UserName } });
+
+        usuariosForIdUsuarioEvento = await reincardbService.GetUsuario(new Query { Filter = $@"i => (i.Usuario1 == @0 || i.Correo_Electronico == @0)", FilterParameters = new object[] { securityService.User.UserName } });
+
+        Reincarapp.Models.reincardb.Usuario usuario = null;
+
+        if (usuariosForIdUsuario.ToList().Count > 0)
+        {
+            usuario = usuariosForIdUsuario.FirstOrDefault();
+        }
+        else
+        {
+            throw new Exception("Correo electronico del usuario esta registrado mas de una vez");
+        }
+
+
+        evento = new Reincarapp.Models.reincardb.Evento() { Id_Cliente_Deuda = ClienteDeuda.Id_Cliente_Deuda, Id_Negocio_Cliente = IdNegocio, Id_Usuario_Evento = usuario.Id_Usuario,EventoDet = new List<Reincarapp.Models.reincardb.EventoDet>() };
+
+
+        clasificacionAdicionalsForIdClasificacionAdicional = await reincardbService.GetClasificacionAdicional(new Query { Filter = $@"i => " + strQueryClasif, FilterParameters = new object[] { 10, ClienteDeuda.Id_Cliente } });
+
+
+        datoPersonasForIdDatoPersona = await reincardbService.GetDatoPersona(new Query { Filter = $@"i => i.Id_Persona == @0", FilterParameters = new object[] { ClienteDeuda.Id_Persona } });
+
+        clasificacionAdicionalsForIdMarca = await reincardbService.GetClasificacionAdicional(new Query { Filter = $@"i => " + strQueryClasif, FilterParameters = new object[] { 4, ClienteDeuda.Id_Cliente } });
+
+        clasificacionAdicionalsForIdMedioDePago = await reincardbService.GetClasificacionAdicional(new Query { Filter = $@"i => " + strQueryClasif, FilterParameters = new object[] { 7, ClienteDeuda.Id_Cliente } });
+
+        //municipiosForIdMunicipio = await reincardbService.GetMunicipios();
+
+        clasificacionAdicionalsForIdRazonMora = await reincardbService.GetClasificacionAdicional(new Query { Filter = $@"i => " + strQueryClasif, FilterParameters = new object[] { 3, ClienteDeuda.Id_Cliente } });
+
+        clasificacionAdicionalsForIdRazonesPosibleExtracto = await reincardbService.GetClasificacionAdicional(new Query { Filter = $@"i => " + strQueryClasif, FilterParameters = new object[] { 8, ClienteDeuda.Id_Cliente } });
+
+        clasificacionAdicionalsForIdContactadoPor = await reincardbService.GetClasificacionAdicional(new Query { Filter = $@"i => i.Id_Tipo_Clasificacion_Adicional == @0", FilterParameters = new object[] { 12 } });
+
+
+        resultadoEventosForIdResultadoEvento = await reincardbService.GetResultadoEvento(new Query { Filter = $@"i => i.Id_Cliente == @0", FilterParameters = new object[] { ClienteDeuda.Id_Cliente } });
+
+        //tareasForIdTarea = await reincardbService.GetTareas();
+
+        tipoComunicacionsForIdTipoComunicacion = await reincardbService.GetTipoComunicacion(new Query { Filter = $@"i => i.Id_Cliente == @0", FilterParameters = new object[] { ClienteDeuda.Id_Cliente } });
+
+        //clasificacionAdicionalsForIdTipoVivienda2 = await reincardbService.GetClasificacionAdicional();
+
+        }
+        catch (Exception ex)
+        {
+            errorVisible = true;
+            errorMessage = ex.Message;
+        }
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.Evento evento;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdActividadLaboral;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdClasificacionAdicional;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdClasificacionAdicional1;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdClasificacionAdicional2;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClienteDeuda> clienteDeudaForIdClienteDeuda;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.DatoPersona> datoPersonasForIdDatoPersona;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdMarca;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdMedioDePago;
+
+        protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdContactadoPor;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Municipio> municipiosForIdMunicipio;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdRazonMora;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdRazonesPosibleExtracto;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ResultadoEvento> resultadoEventosForIdResultadoEvento;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Tarea> tareasForIdTarea;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.TipoComunicacion> tipoComunicacionsForIdTipoComunicacion;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClasificacionAdicional> clasificacionAdicionalsForIdTipoVivienda2;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuario;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuarioEvento;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+
+
+            evento.Fecha_Creacion_Evento = DateTime.Now;
+            evento.Fecha_Creacion_Registro = DateTime.Now;
+            evento.Tipo_Creacion_Registro = "WEB";
+            evento.Id_Tarea = IdTarea != null && IdTarea > 0 ? IdTarea : null;
+
+            evento.EventoDet.Add(new Models.reincardb.EventoDet(){
+
+                Id_Canal_Alterno = IdContactadoPor,
+                Id_Contactado_Por = IdContactadoPor,
+                AutorizaContacto = AutorizaContacto,
+
+            });
+
+
+
+
+            await reincardbService.CreateEvento(evento);
+
+            if (screen == "gestionar")
+                EnabledDisabledParent(true);
+            else
+                DialogService.Close(evento);
+
+            //await ctx.Entry(evento).ReloadAsync();
+            // if (tarea != null)
+            //     await ctx.Entry(tarea).ReloadAsync();
+
+
+
+            /*
+            using (IDbContextTransaction transaction = await ctx.Database.BeginTransactionAsync())
+            {
+                try
+                {
+
+
+
+
+
+                    //this._context.Documentos.Update(documento);
+
+                    // if (documento.DocumentoEstados.Count() > 0)
+                    // {
+
+                    //     var ar = await this._context.DocumentoEstados.Where(x => x.DocumentoId == documento.Id && x.Fecha_Final == null)
+                    //                        .ExecuteUpdateAsync(s => s.SetProperty(e => e.Fecha_Final, e => DateTime.Now));
+
+                    //     await this._context.DocumentoEstados.AddRangeAsync(documento.DocumentoEstados.Where(x => x.Id == 0));
+
+
+                    // }
+
+                    // _context.Entry(documento).State = EntityState.Modified;
+
+                    // await this._context.SaveChangesAsync();
+                    // await transaction.CommitAsync();
+
+                    }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    }
+
+
+                }*/
+
+
+
+
+
+                                    // if (tarea != null)
+
+                                    // {
+
+                                    //     tarea.Fecha_Ejecucion_Tarea = DateTime.Now;
+
+
+
+                                    // }
+
+
+
+
+                                    //DialogService.Close(evento);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.InnerException == null ? ex.Message : ex.InnerException.Message;
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errorVisible = true;
+
+            await reincardbService.CreateLogapp(new Reincarapp.Models.reincardb.Logapp()
+                        {
+                            IdUsuario = evento.Id_Usuario_Evento,
+                            FechaCreacion = DateTime.Now,
+                            Texto = "Error al crear evento: " + ex.StackTrace,
+                            Proc = "AddEvento.Form_Submit"
+                        });
+
+            //await ctx.SaveChangesAsync();
+            this.StateHasChanged();
+
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+
+        if (screen == "gestionar")
+            EnabledDisabledParent(true);
+        else
+            DialogService.Close(null);
+
+
+        
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+
+    bool ValidateRequiredNumeric(long dato)
+    {
+        return dato == 0 ? false : true;
+    }
+
+    bool ValidateRequiredFechaComp()
+    {
+        var EsCompromiso = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.es_compromiso ?? false;
+        var EsRecaudo = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.es_recaudo ?? false;
+
+        if ((EsCompromiso || EsRecaudo) && ( evento.Fecha_Realizacion_Evento == null))
+            return false;
+        else
+            return true;
+
+
+
+    }
+
+    bool ValidateRequiredMonto()
+    {
+        var EsCompromiso = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.es_compromiso ?? false;
+        var EsRecaudo = resultadoEventosForIdResultadoEvento.Where(x => x.Id_Resultado_Evento == evento.Id_Resultado_Evento).FirstOrDefault()?.es_recaudo ?? false;
+
+        if ((EsCompromiso || EsRecaudo) && (evento.Monto == null))
+            return false;
+        else
+            return true;
+
+
+
+    }
+
+    async void ChildFiredEvent(Reincarapp.Models.reincardb.DatoPersona persona)
+    {
+
+        DatoPersonaSel = persona;
+        evento.Id_Dato_Persona = DatoPersonaSel.Id_Dato_Persona;
+
+        datPerTabSelected = false;
+
+        this.StateHasChanged();
+        //AddDialog = false;
+
+        // dialogService.Close();
+        // registros = await ctxEsp.GetPD(decimal.Parse(ParentId));
+        // await grid.Reload();
+        // this.StateHasChanged();
+
+        // EnabledDisabledParent(true);
+    }
+
+}

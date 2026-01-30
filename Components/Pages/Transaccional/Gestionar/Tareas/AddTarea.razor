@@ -1,0 +1,196 @@
+@page "/add-tarea"
+
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+@inject SecurityService securityService
+
+<PageTitle>Add Tarea</PageTitle>
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@errMsg</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Tarea" Data="@tarea" Visible="@(tarea != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Texto Tarea" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@tarea.Texto_Tarea" Name="Texto_Tarea" />
+                  </ChildContent>    
+                  <Helper>
+                    <RadzenRequiredValidator Component="Texto_Tarea" Text="Texto_Tarea is required" />
+                  </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Fecha Realizacion Tarea" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker  style="display: block; width: 100%" @bind-Value="@tarea.Fecha_Realizacion_Tarea" Name="Fecha_Realizacion_Tarea" ShowTime="true" HourFormat="12" DateFormat="dd/MM/yyyy h:mm tt" />
+                </ChildContent>    
+                  <Helper>
+                    <RadzenRequiredValidator Component="Fecha_Realizacion_Tarea" Text="Fecha_Realizacion_Tarea is required" />
+                  </Helper>
+            </RadzenFormField>
+          @*   <RadzenFormField Text="Fecha Creacion Tarea" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@tarea.Fecha_Creacion_Tarea" Name="Fecha_Creacion_Tarea" />
+              </ChildContent>
+            </RadzenFormField> *@
+      @*       <RadzenFormField Text="Fecha Ejecucion Tarea" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@tarea.Fecha_Ejecucion_Tarea" Name="Fecha_Ejecucion_Tarea" />
+              </ChildContent>
+            </RadzenFormField> *@
+            <RadzenFormField Text="monto" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@tarea.monto" Name="monto" />
+              </ChildContent>
+            </RadzenFormField>
+           @*  <RadzenFormField Text="Cliente Deudum" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@clienteDeudaForIdClienteDeuda" TextProperty="campana_reparto" ValueProperty="Id_Cliente_Deuda" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@tarea.Id_Cliente_Deuda" Name="Id_Cliente_Deuda"
+                           />
+              </ChildContent>
+            </RadzenFormField> *@
+         @*    <RadzenFormField Text="Evento" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@eventosForIdEvento" TextProperty="Texto_Evento_Largo" ValueProperty="Id_Evento" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@tarea.Id_Evento" Name="Id_Evento"
+                           />
+              </ChildContent>
+            </RadzenFormField> *@
+            <RadzenFormField Text="Tipo Comunicacion" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipoComunicacionsForIdTipoComunicacion" TextProperty="Nombre_Tipo_Comunicacion" ValueProperty="Id_Tipo_Comunicacion" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@tarea.Id_Tipo_Comunicacion" Name="Id_Tipo_Comunicacion"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Tipo Tarea" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipoTareasForidTipoTarea" TextProperty="nombre" ValueProperty="id_tipo_tarea" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@tarea.id_tipo_tarea" Name="id_tipo_tarea"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+           @*  <RadzenFormField Text="Usuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuario" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@tarea.Id_Usuario" Name="Id_Usuario"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Usuario1" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuarioTarea" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@tarea.Id_Usuario_Tarea" Name="Id_Usuario_Tarea"
+                           />
+              </ChildContent>
+            </RadzenFormField> *@
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+    [Parameter]
+    public decimal ClienteDeudaId { get; set; }
+    Reincarapp.Models.reincardb.ClienteDeuda ClienteDeuda = null;
+
+    string errMsg = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try { 
+
+            clienteDeudaForIdClienteDeuda = await reincardbService.GetClienteDeuda(new Query { Filter = $@"i => i.Id_Cliente_Deuda = @0", FilterParameters = new object[] { ClienteDeudaId }, Expand = "Cliente,Persona" });
+
+            if (clienteDeudaForIdClienteDeuda.ToList().Count > 0)
+            {
+                ClienteDeuda = clienteDeudaForIdClienteDeuda.FirstOrDefault();
+            }
+
+            usuariosForIdUsuario = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Usuario1 = @0 || i.Correo_Electronico == @0", FilterParameters = new object[] { securityService.User.UserName } });
+
+            usuariosForIdUsuarioTarea = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Usuario1 = @0 || i.Correo_Electronico == @0", FilterParameters = new object[] { securityService.User.UserName } });
+
+            Reincarapp.Models.reincardb.Usuario usuario = null;
+
+            if (usuariosForIdUsuario.ToList().Count == 1)
+            {
+                usuario = usuariosForIdUsuario.FirstOrDefault();
+            }
+            else
+            {
+                throw new Exception("Correo electronico del usuario esta registrado mas de una vez");
+            }
+
+
+            tarea = new Reincarapp.Models.reincardb.Tarea() {Id_Cliente_Deuda = ClienteDeuda.Id_Cliente_Deuda,Id_Usuario_Tarea = usuario.Id_Usuario,Id_Usuario = usuario.Id_Usuario };
+
+
+
+            //eventosForIdEvento = await reincardbService.GetEventos();
+
+            tipoComunicacionsForIdTipoComunicacion = await reincardbService.GetTipoComunicacion(new Query { Filter = $@"i => i.Id_Cliente = @0", FilterParameters = new object[] { ClienteDeuda.Id_Cliente } });
+
+            tipoTareasForidTipoTarea = await reincardbService.GetTipoTarea();
+
+        } catch (Exception ex)
+        {
+            errMsg = ex.Message;
+            errorVisible = true;
+
+        }
+
+
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.Tarea tarea;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.ClienteDeuda> clienteDeudaForIdClienteDeuda;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Evento> eventosForIdEvento;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.TipoComunicacion> tipoComunicacionsForIdTipoComunicacion;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.TipoTarea> tipoTareasForidTipoTarea;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuario;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuarioTarea;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+
+            tarea.Fecha_Creacion_Tarea = DateTime.Now;
+
+            await reincardbService.CreateTarea(tarea);
+            DialogService.Close(tarea);
+        }
+        catch (Exception ex)
+        {
+            
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errMsg = ex.Message;
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        DialogService.Close(null);
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+}

@@ -7,11 +7,13 @@ using Reincarapp.Models;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.AspNetCore.Components.Authorization;
+using MatBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddHubOptions(options => options.MaximumReceiveMessageSize = 10 * 1024 * 1024);
 builder.Services.AddControllers();
+builder.Services.AddMatBlazor();
 builder.Services.AddRadzenComponents();
 builder.Services.AddRadzenCookieThemeService(options =>
 {
@@ -20,9 +22,15 @@ builder.Services.AddRadzenCookieThemeService(options =>
 });
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<Reincarapp.reincardbService>();
+builder.Services.AddScoped<Reincarapp.TodoItemService>();
+builder.Services.AddScoped<Reincarapp.Services.DatoPersonaSyncService>();
 builder.Services.AddDbContext<Reincarapp.Data.reincardbContext>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("reincardbConnection"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("reincardbConnection")));
+});
+builder.Services.AddDbContext<Reincarapp.Data.reincardbContext2>(options =>
+{
+    options.UseMySql(builder.Configuration.GetConnectionString("reincardbConnection2"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("reincardbConnection2")));
 });
 builder.Services.AddHttpClient("Reincarapp").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false }).AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddHeaderPropagation(o => o.Headers.Add("Cookie"));
