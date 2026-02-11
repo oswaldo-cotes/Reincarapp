@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using Microsoft.Win32;
 using Radzen;
 using Radzen.Blazor;
+using Reincarapp.Components.Pages.Transaccional.Gestionar;
 using Reincarapp.Data;
-//using Reincarapp.Pages.Configuracion.Seguridad.UsarioCliente;
+using Reincarapp.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Reincarapp.Components.Pages.Transaccional.Gestionar.ClienteDeuda
 {
-    public partial class ClienteDeuda
+    public partial class ClienteDeuda : IAsyncDisposable
     {
         [Inject]
         protected IJSRuntime JSRuntime { get; set; }
@@ -38,234 +39,498 @@ namespace Reincarapp.Components.Pages.Transaccional.Gestionar.ClienteDeuda
         public reincardbService reincardbService { get; set; }
 
         [Inject]
-        public reincardbContext db { get; set; }
+        public IDbContextFactory<reincardbContext> DbContextFactory { get; set; }
 
-        protected IEnumerable<Reincarapp.Models.reincardb.ClienteDeuda> clienteDeuda;
-
-        protected RadzenDataGrid<Reincarapp.Models.reincardb.ClienteDeuda> grid0;
-
-        protected string search = "";
-
-        string searchValue = "";
+        [Inject]
+        protected ILogger<ClienteDeuda> Logger { get; set; }
 
         [Inject]
         protected SecurityService Security { get; set; }
 
-        DateTime now = DateTime.Now;
-        DateTime startDate;
-        DateTime endDate;
+        [Inject]
+        protected ILogAppService LogAppService { get; set; }
 
-
+        protected IEnumerable<Reincarapp.Models.reincardb.ClienteDeuda> clienteDeuda;
+        protected RadzenDataGrid<Reincarapp.Models.reincardb.ClienteDeuda> grid0;
+        protected string search = "";
+        protected string searchValue = "";
         protected bool isBusy = false;
 
-        List<Models.reincardb.UsuarioCliente> usuarioClientes = new List<Models.reincardb.UsuarioCliente>();
+        private DateTime now = DateTime.Now;
+        private DateTime startDate;
+        private DateTime endDate;
+        private bool _isLoading = false;
+
+        private List<Models.reincardb.UsuarioCliente> usuarioClientes = new List<Models.reincardb.UsuarioCliente>();
         protected IEnumerable<Reincarapp.Models.reincardb.Cliente> clientesForIdCliente;
 
-        long? IdCliente;
-
+        private long? IdCliente;
 
         protected async Task Search(ChangeEventArgs args)
         {
-            search = $"{args.Value}";
-
-            await grid0.GoToPage(0);
-
-            /*
-
-
-            //var  dato = await reincardbService.GetClienteDeudaDatos(new Query { Filter = $@"i => i.Dato.Contains(@0)  ", FilterParameters = new object[] { search }, Expand = "Cliente,ClienteDeudum,ClienteDeudum.EstadoClienteDeudum" });
-            if (!Security.IsInRole(new string[] {"Administrador"}))
+            try
             {
+                search = $"{args.Value}";
+                Logger.LogInformation("Búsqueda iniciada con término: {SearchTerm}", search);
 
-                clienteDeuda = (await db.ClienteDeudaDatos.Include(x => x.Cliente)
-                                                          .Include(x => x.ClienteDeudum.Persona)
-                                                          .Include(x => x.ClienteDeudum.EstadoClienteDeudum)
-                                                          .Include(x => x.ClienteDeudum.Usuario)
-                                                          .Include(x => x.ClienteDeudum.Usuario1)
-                                                          .Include(x => x.ClienteDeudum.ResultadoEvento1)
-                                                          .Include(x => x.ClienteDeudum.ResultadoEvento)
-                                                          //.Include(x => x.ClienteDeudum.Eventos.Where(x=> x.Fecha_Creacion_Evento >= startDate && x.Fecha_Creacion_Evento <= endDate))
-                                                          .Where(x => x.dato.Contains(search) && x.Fecha_Final == null && x.Fecha_Inicial >= startDate && x.Fecha_Inicial <= endDate).ToListAsync()).Select(x => x.ClienteDeudum);
+                if (grid0 != null)
+                {
+                    await grid0.GoToPage(0);
+                }
 
+                Logger.LogInformation("Búsqueda completada exitosamente");
             }
-            else {
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error en búsqueda con término: {SearchTerm}", search);
 
-                clienteDeuda = (await db.ClienteDeudaDatos.Include(x => x.Cliente)
-                                                          .Include(x => x.ClienteDeudum.Persona)
-                                                          .Include(x => x.ClienteDeudum.EstadoClienteDeudum)
-                                                          .Include(x => x.ClienteDeudum.Usuario)
-                                                          .Include(x => x.ClienteDeudum.Usuario1)
-                                                          .Include(x => x.ClienteDeudum.ResultadoEvento1)
-                                                          .Include(x => x.ClienteDeudum.ResultadoEvento)
-                                                          //.Include(x => x.ClienteDeudum.Eventos.Where(x=> x.Fecha_Creacion_Evento >= startDate && x.Fecha_Creacion_Evento <= endDate))
-                                                          .Where(x => usuarioClientes.Select(y => y.Id_Cliente).Contains(x.Cliente.Id_Cliente) && x.dato.Contains(search) && x.Fecha_Final == null && x.Fecha_Inicial >= startDate && x.Fecha_Inicial <= endDate).ToListAsync()).Select(x => x.ClienteDeudum);   //await reincardbService.GetClienteDeuda(new Query { Filter = $@"i => ", FilterParameters = new object[] { search }, Expand = "EstadoClienteDeudum,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento,ClienteDeudaDato" });
+                // Registrar error en logapp usando el servicio
+                await LogAppService.RegistrarErrorAsync(
+                    "ClienteDeuda.Search",
+                    ex,
+                    $"Error al buscar con término: {search}",
+                    0,
+                    Security?.User?.Id
+                );
 
-            }*/
-                
+
+                await ShowErrorNotification("Error en búsqueda", ex.Message);
+            }
         }
+
         protected override async Task OnInitializedAsync()
         {
+            try
+            {
+                Logger.LogInformation("Inicializando componente ClienteDeuda para usuario: {Username}", Security?.User?.UserName);
 
-            try { 
-             startDate = new DateTime(now.Year, now.Month, 1);
-             endDate = startDate.AddMonths(1).AddDays(-1);
+                startDate = new DateTime(now.Year, now.Month, 1);
+                endDate = startDate.AddMonths(1).AddDays(-1);
 
-                usuarioClientes = await db.UsuarioCliente.Include(x => x.Usuario).Where(x => x.Usuario.Usuario1 == Security.User.UserName).ToListAsync();
+                Logger.LogInformation("Rango de fechas establecido: {StartDate} - {EndDate}", startDate, endDate);
 
+                using var context = await DbContextFactory.CreateDbContextAsync();
+
+                usuarioClientes = await context.UsuarioCliente
+                    .Include(x => x.Usuario)
+                    .Where(x => x.Usuario.Usuario1 == Security.User.UserName)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                Logger.LogInformation("UsuarioClientes cargados: {Count}", usuarioClientes.Count);
 
                 if (Security.IsInRole(new string[] { "Administrador" }))
                 {
-                    clientesForIdCliente = await db.Cliente.Where(x=>x.sp_ins == "SP_INSERT_GENERICO").ToListAsync();
-
-                }
-                else {
-
-                    clientesForIdCliente = (await db.Cliente.Where(x=>x.sp_ins == "SP_INSERT_GENERICO").ToListAsync()).Where(x => usuarioClientes.Select(y => y.Id_Cliente).Contains(x.Id_Cliente));
-
-                }
-
+                    Logger.LogInformation("Usuario es Administrador, cargando todos los clientes");
                     
+                    clientesForIdCliente = await context.Cliente
+                        .Where(x => x.sp_ins == "SP_INSERT_GENERICO")
+                        .AsNoTracking()
+                        .ToListAsync();
+                }
+                else
+                {
+                    Logger.LogInformation("Usuario no es Administrador, filtrando clientes por permisos");
+                    
+                    var clienteIds = usuarioClientes.Select(y => y.Id_Cliente).ToList();
+                    
+                    clientesForIdCliente = (await context.Cliente
+                        .Where(x => x.sp_ins == "SP_INSERT_GENERICO")
+                        .AsNoTracking()
+                        .ToListAsync())
+                        .Where(x => clienteIds.Contains(x.Id_Cliente));
+                }
 
-               
-
+                Logger.LogInformation("Clientes cargados exitosamente: {Count}", clientesForIdCliente?.Count() ?? 0);
             }
-            catch (Exception ex) { 
-            
-            
-            var error = ex.Message;
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al inicializar componente ClienteDeuda para usuario: {Username}", Security?.User?.UserName);
 
 
+                await LogAppService.RegistrarErrorAsync(
+                   "ClienteDeuda.OnInitializedAsync",
+                   ex,
+                   "Error al inicializar componente",
+                   0,
+                   Security?.User?.Id
+               );
+
+
+                await ShowErrorNotification("Error de inicialización", "No se pudo cargar la información inicial");
             }
-
-            //clienteDeuda = await reincardbService.GetClienteDeuda(new Query { Filter = $@"i => i.Nombre_Cliente_Deuda.Contains(@0) || i.Id_Negocio.Contains(@0) || i.Id_Asignacion.Contains(@0) || i.Numero_Documento.Contains(@0) || i.campana_reparto.Contains(@0)", FilterParameters = new object[] { search }, Expand = "EstadoClienteDeudum,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento" });
         }
 
         protected async Task AddButtonClick(MouseEventArgs args)
         {
-            isBusy = true;
-            await LoadData();
-            isBusy = false;
-            //await DialogService.OpenAsync<AddClienteDeudum>("Add ClienteDeudum", null);
-            //await grid0.Reload();
-        }
-
-
-        string GetMejorGestion(Models.reincardb.ClienteDeuda clienteDeudum) {
-            string res = "Sin Gestion";
-            var evento = clienteDeudum.ClienteDeudaCons.FirstOrDefault()?.Evento1;
-            if (evento == null)
-                return res;
-            if (evento.Fecha_Creacion_Evento >= startDate && evento.Fecha_Creacion_Evento <= endDate)
+            try
             {
-                res = evento.ResultadoEvento.Nombre_Resultado_Evento;
+                Logger.LogInformation("Botón Agregar presionado, cargando datos para IdCliente: {IdCliente}", IdCliente);
+
+                if (!IdCliente.HasValue)
+                {
+                    Logger.LogWarning("No se ha seleccionado un cliente");
+                    await ShowWarningNotification("Selección requerida", "Por favor seleccione un cliente");
+                    return;
+                }
+
+                isBusy = true;
+                await InvokeAsync(() => StateHasChanged());
+
+                await LoadData();
+
+                Logger.LogInformation("Datos cargados exitosamente para IdCliente: {IdCliente}", IdCliente);
             }
-            return res;
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al cargar datos para IdCliente: {IdCliente}", IdCliente);
+                await ShowErrorNotification("Error al cargar datos", ex.Message);
+            }
+            finally
+            {
+                isBusy = false;
+                await InvokeAsync(() => StateHasChanged());
+            }
         }
 
-        string GetUltimaGestion(Models.reincardb.ClienteDeuda clienteDeudum)
+        protected string GetMejorGestion(Models.reincardb.ClienteDeuda clienteDeudum)
         {
-
-            string res = "Sin Gestion";
-            var evento = clienteDeudum.ClienteDeudaCons.FirstOrDefault()?.Evento;
-            if (evento == null)
-                return res;
-            if (evento.Fecha_Creacion_Evento >= startDate && evento.Fecha_Creacion_Evento <= endDate)
+            try
             {
-                res = evento.ResultadoEvento.Nombre_Resultado_Evento;
-            }
-            return res;
+                if (clienteDeudum == null)
+                {
+                    Logger.LogWarning("GetMejorGestion llamado con clienteDeudum null");
+                    return "Sin Gestion";
+                }
 
+                string res = "Sin Gestion";
+                var evento = clienteDeudum.ClienteDeudaCons?.FirstOrDefault()?.Evento1;
+                
+                if (evento == null)
+                {
+                    return res;
+                }
+
+                if (evento.Fecha_Creacion_Evento >= startDate && evento.Fecha_Creacion_Evento <= endDate)
+                {
+                    res = evento.ResultadoEvento?.Nombre_Resultado_Evento ?? "Sin Resultado";
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al obtener mejor gestión para ClienteDeuda: {IdClienteDeuda}", 
+                    clienteDeudum?.Id_Cliente_Deuda);
+                return "Error";
+            }
         }
 
-        async Task LoadData() {
+        protected string GetUltimaGestion(Models.reincardb.ClienteDeuda clienteDeudum)
+        {
+            try
+            {
+                if (clienteDeudum == null)
+                {
+                    Logger.LogWarning("GetUltimaGestion llamado con clienteDeudum null");
+                    return "Sin Gestion";
+                }
 
-            bool isSearchValueNumeric = long.TryParse(searchValue, out _);
+                string res = "Sin Gestion";
+                var evento = clienteDeudum.ClienteDeudaCons?.FirstOrDefault()?.Evento;
+                
+                if (evento == null)
+                {
+                    return res;
+                }
 
-            clienteDeuda = ((await db.ClienteDeudaDato.AsNoTracking().Include(x => x.Cliente)
-                                                          .Include(x => x.Cliente)
-                                                          .Include(x => x.ClienteDeuda.Persona)
-                                                          .Include(x => x.ClienteDeuda.EstadoClienteDeuda)
-                                                          .Include(x => x.ClienteDeuda.Usuario)
-                                                          .Include(x => x.ClienteDeuda.Usuario1)
-                                                          .Include(x => x.ClienteDeuda.ResultadoEvento1)
-                                                          .Include(x => x.ClienteDeuda.ResultadoEvento)
-                                                          .Include(x => x.ClienteDeuda.ClienteDeudaCons)
-                                                          .ThenInclude(x => x.Evento)
-                                                          .ThenInclude(x => x.ResultadoEvento)
-                                                          .Include(x => x.ClienteDeuda.ClienteDeudaCons)
-                                                          .ThenInclude(x => x.Evento1)
-                                                          .ThenInclude(Evento => Evento.ResultadoEvento)
-                                                          //.Include(x => x.ClienteDeudum.Eventos.Where(x=> x.Fecha_Creacion_Evento >= startDate && x.Fecha_Creacion_Evento <= endDate))
-                                                          .Where(x => x.Id_Cliente == this.IdCliente && (x.Identificacion.Contains(searchValue) || (!isSearchValueNumeric && x.Dato.Contains(searchValue))) && x.Fecha_Final == null && x.Fecha_Inicial >= startDate && x.Fecha_Inicial <= endDate).ToListAsync()).Select(x => x.ClienteDeuda)).OrderBy(x => x.Persona.Nombre_Persona).OrderBy(x => x.Persona.Numero_Documento).ToList();
+                if (evento.Fecha_Creacion_Evento >= startDate && evento.Fecha_Creacion_Evento <= endDate)
+                {
+                    res = evento.ResultadoEvento?.Nombre_Resultado_Evento ?? "Sin Resultado";
+                }
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al obtener última gestión para ClienteDeuda: {IdClienteDeuda}", 
+                    clienteDeudum?.Id_Cliente_Deuda);
+                return "Error";
+            }
+        }
+
+        private async Task LoadData()
+        {
+            try
+            {
+                if (_isLoading)
+                {
+                    Logger.LogWarning("LoadData ya está en ejecución, omitiendo llamada duplicada");
+                    return;
+                }
+
+                _isLoading = true;
+
+                Logger.LogInformation("Cargando datos para IdCliente: {IdCliente}, SearchValue: {SearchValue}, Rango: {StartDate} - {EndDate}", 
+                    IdCliente, searchValue, startDate, endDate);
+
+                bool isSearchValueNumeric = long.TryParse(searchValue, out _);
+
+                using var context = await DbContextFactory.CreateDbContextAsync();
+
+                var query = context.ClienteDeudaDato
+                    .AsNoTracking()
+                    .Include(x => x.Cliente)
+                    .Include(x => x.ClienteDeuda.Persona)
+                    .Include(x => x.ClienteDeuda.EstadoClienteDeuda)
+                    .Include(x => x.ClienteDeuda.Usuario)
+                    .Include(x => x.ClienteDeuda.Usuario1)
+                    .Include(x => x.ClienteDeuda.ResultadoEvento1)
+                    .Include(x => x.ClienteDeuda.ResultadoEvento)
+                    .Include(x => x.ClienteDeuda.ClienteDeudaCons)
+                        .ThenInclude(x => x.Evento)
+                        .ThenInclude(x => x.ResultadoEvento)
+                    .Include(x => x.ClienteDeuda.ClienteDeudaCons)
+                        .ThenInclude(x => x.Evento1)
+                        .ThenInclude(Evento => Evento.ResultadoEvento)
+                    .Where(x => x.Id_Cliente == this.IdCliente && 
+                           x.Fecha_Final == null && 
+                           x.Fecha_Inicial >= startDate && 
+                           x.Fecha_Inicial <= endDate);
+
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    if (isSearchValueNumeric)
+                    {
+                        query = query.Where(x => x.Identificacion.Contains(searchValue));
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.Dato.Contains(searchValue));
+                    }
+                }
+
+                var clienteDeudaList = await query.ToListAsync();
+
+                clienteDeuda = clienteDeudaList
+                    .Select(x => x.ClienteDeuda)
+                    .OrderBy(x => x.Persona?.Numero_Documento)
+                    .ThenBy(x => x.Persona?.Nombre_Persona)
+                    .ToList();
+
+                Logger.LogInformation("Datos cargados exitosamente. Total registros: {Count}", clienteDeuda?.Count() ?? 0);
+
+                if (grid0 != null)
+                {
+                    await grid0.Reload();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al cargar datos para IdCliente: {IdCliente}, SearchValue: {SearchValue}", 
+                    IdCliente, searchValue);
 
 
+                await LogAppService.RegistrarErrorAsync(
+                    "ClienteDeuda.LoadData",
+                    ex,
+                    $"Error al cargar datos. IdCliente: {IdCliente}, SearchValue: {searchValue}",
+                    0,
+                    Security?.User?.Id
+                );
 
 
-
-
-            await grid0.Reload();
-
-
+                clienteDeuda = Enumerable.Empty<Reincarapp.Models.reincardb.ClienteDeuda>();
+                await ShowErrorNotification("Error al cargar datos", ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         protected async Task EditRow(DataGridRowMouseEventArgs<Reincarapp.Models.reincardb.ClienteDeuda> args)
         {
-            //await DialogService.OpenAsync<EditClienteDeudum>("Edit ClienteDeudum", new Dictionary<string, object> { {"Id_Cliente_Deuda", args.Data.Id_Cliente_Deuda} });
-            await DialogService.OpenAsync<GestionarDeuda>("Gestionando...", new Dictionary<string, object> { { "registro", args.Data } }, new DialogOptions { Width = "100%", Height = "100%", Draggable = false, Resizable = false });
+            try
+            {
+                if (args?.Data == null)
+                {
+                    Logger.LogWarning("EditRow llamado con datos null");
+                    return;
+                }
 
-            await LoadData();
+                Logger.LogInformation("Abriendo diálogo de gestión para ClienteDeuda: {IdClienteDeuda}", 
+                    args.Data.Id_Cliente_Deuda);
 
-            
+                await DialogService.OpenAsync<GestionarDeuda>(
+                    "Gestionando...",
+                    new Dictionary<string, object> { { "registro", args.Data } },
+                    new DialogOptions { Width = "100%", Height = "100%", Draggable = false, Resizable = false }
+                );
 
+                Logger.LogInformation("Diálogo cerrado, recargando datos");
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al editar ClienteDeuda: {IdClienteDeuda}", args?.Data?.Id_Cliente_Deuda);
+                await ShowErrorNotification("Error al abrir gestión", ex.Message);
+            }
         }
 
         protected async Task GridDeleteButtonClick(MouseEventArgs args, Reincarapp.Models.reincardb.ClienteDeuda clienteDeudum)
         {
             try
             {
-                if (await DialogService.Confirm("Are you sure you want to delete this record?") == true)
+                if (clienteDeudum == null)
+                {
+                    Logger.LogWarning("GridDeleteButtonClick llamado con clienteDeudum null");
+                    return;
+                }
+
+                Logger.LogInformation("Intentando eliminar ClienteDeuda: {IdClienteDeuda}", clienteDeudum.Id_Cliente_Deuda);
+
+                if (await DialogService.Confirm("¿Está seguro que desea eliminar este registro?") == true)
                 {
                     var deleteResult = await reincardbService.DeleteClienteDeuda(clienteDeudum.Id_Cliente_Deuda);
 
                     if (deleteResult != null)
                     {
-                        await grid0.Reload();
+                        Logger.LogInformation("ClienteDeuda eliminado exitosamente: {IdClienteDeuda}", 
+                            clienteDeudum.Id_Cliente_Deuda);
+
+                        await LoadData();
+
+                        NotificationService.Notify(new NotificationMessage
+                        {
+                            Severity = NotificationSeverity.Success,
+                            Summary = "Éxito",
+                            Detail = "Registro eliminado correctamente",
+                            Duration = 3000
+                        });
                     }
+                }
+                else
+                {
+                    Logger.LogInformation("Eliminación cancelada por el usuario para ClienteDeuda: {IdClienteDeuda}", 
+                        clienteDeudum.Id_Cliente_Deuda);
                 }
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Error al eliminar ClienteDeuda: {IdClienteDeuda}", clienteDeudum?.Id_Cliente_Deuda);
+                
                 NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Error,
-                    Summary = $"Error",
-                    Detail = $"Unable to delete ClienteDeudum"
+                    Summary = "Error",
+                    Detail = $"No se pudo eliminar el registro: {ex.Message}",
+                    Duration = 5000
                 });
             }
         }
 
         protected async Task ExportClick(RadzenSplitButtonItem args)
         {
-            if (args?.Value == "csv")
+            try
             {
-                await reincardbService.ExportClienteDeudaToCSV(new Query
-{
-    Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
-    OrderBy = $"{grid0.Query.OrderBy}",
-    Expand = "EstadoClienteDeudum,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento",
-    Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
-}, "ClienteDeuda");
-            }
+                Logger.LogInformation("Exportando ClienteDeuda a formato: {Format}", args?.Value ?? "xlsx");
 
-            if (args == null || args.Value == "xlsx")
+                if (grid0 == null)
+                {
+                    Logger.LogWarning("Grid no está inicializado para exportación");
+                    await ShowWarningNotification("Error de exportación", "No hay datos para exportar");
+                    return;
+                }
+
+                var query = new Query
+                {
+                    Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter) ? "true" : grid0.Query.Filter)}",
+                    OrderBy = $"{grid0.Query.OrderBy}",
+                    Expand = "EstadoClienteDeudum,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento",
+                    Select = string.Join(",", grid0.ColumnsCollection
+                        .Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property))
+                        .Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
+                };
+
+                if (args?.Value == "csv")
+                {
+                    await reincardbService.ExportClienteDeudaToCSV(query, "ClienteDeuda");
+                    Logger.LogInformation("Exportación a CSV completada exitosamente");
+                }
+                else
+                {
+                    await reincardbService.ExportClienteDeudaToExcel(query, "ClienteDeuda");
+                    Logger.LogInformation("Exportación a Excel completada exitosamente");
+                }
+
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Exportación exitosa",
+                    Detail = "Los datos se han exportado correctamente",
+                    Duration = 3000
+                });
+            }
+            catch (Exception ex)
             {
-                await reincardbService.ExportClienteDeudaToExcel(new Query
-{
-    Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
-    OrderBy = $"{grid0.Query.OrderBy}",
-    Expand = "EstadoClienteDeudum,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento",
-    Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
-}, "ClienteDeuda");
+                Logger.LogError(ex, "Error al exportar ClienteDeuda a formato: {Format}", args?.Value ?? "xlsx");
+                await ShowErrorNotification("Error al exportar", ex.Message);
+            }
+        }
+
+        private async Task ShowErrorNotification(string summary, string detail)
+        {
+            try
+            {
+                await InvokeAsync(() =>
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = summary,
+                        Detail = detail,
+                        Duration = 5000
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al mostrar notificación de error");
+            }
+        }
+
+        private async Task ShowWarningNotification(string summary, string detail)
+        {
+            try
+            {
+                await InvokeAsync(() =>
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = summary,
+                        Detail = detail,
+                        Duration = 4000
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al mostrar notificación de advertencia");
+            }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            try
+            {
+                Logger.LogInformation("Disposing ClienteDeuda component");
+                // Cleanup resources if needed
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al disponer componente ClienteDeuda");
             }
         }
     }

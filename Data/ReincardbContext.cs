@@ -92,925 +92,1079 @@ namespace Reincarapp.Data
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Acueducto)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.AsignacionGestor>()
               .HasOne(i => i.Persona)
               .WithMany(i => i.AsignacionGestor)
               .HasForeignKey(i => i.Id_Persona)
-              .HasPrincipalKey(i => i.Id_Persona);
+              .HasPrincipalKey(i => i.Id_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.AsignacionGestor>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.AsignacionGestor)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.AsignacionGestor>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.AsignacionGestor1)
               .HasForeignKey(i => i.Id_Usuario_Asignado)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Avvillas>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Avvillas)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Avvillasbuc>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Avvillasbuc)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Bancobogota>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Bancobogota)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Bancoomeva>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Bancoomeva)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Base>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.Base)
               .HasForeignKey(i => i.IdCliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Base>()
               .HasOne(i => i.Tipobase)
               .WithMany(i => i.Base)
               .HasForeignKey(i => i.IdTipoBase)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Base>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.Base)
               .HasForeignKey(i => i.IdUsuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Base>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.Base1)
               .HasForeignKey(i => i.IdUsuarioAct)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.BaseJuridica>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.BaseJuridica)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Basecampo>()
               .HasOne(i => i.Base)
               .WithMany(i => i.Basecampo)
               .HasForeignKey(i => i.BaseId)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Basecampo>()
               .HasOne(i => i.Campoclave)
               .WithMany(i => i.Basecampo)
               .HasForeignKey(i => i.CampoClaveId)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Bloqueocontacto>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Bloqueocontacto)
               .HasForeignKey(i => i.IdClienteDeuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Bloqueocontacto>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.Bloqueocontacto)
               .HasForeignKey(i => i.IdEvento)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Bloqueocontacto>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.Bloqueocontacto)
               .HasForeignKey(i => i.IdUsuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.CampoHonorario>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.CampoHonorario)
               .HasForeignKey(i => i.id_cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Censprejuridico>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Censprejuridico)
               .HasForeignKey(i => i.IdClienteDeuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Checprejuridico>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Checprejuridico)
               .HasForeignKey(i => i.IdClienteDeuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Citibank>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Citibank)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Citibank2>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Citibank2)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClasificacionAdicional>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.ClasificacionAdicional)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClasificacionAdicional>()
               .HasOne(i => i.TipoClasificacionAdicional)
               .WithMany(i => i.ClasificacionAdicional)
               .HasForeignKey(i => i.Id_Tipo_Clasificacion_Adicional)
-              .HasPrincipalKey(i => i.Id_Tipo_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Tipo_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.Asignacion)
               .WithMany(i => i.ClienteDeuda)
               .HasForeignKey(i => i.Id_Asignacion)
-              .HasPrincipalKey(i => i.Id_Asignacion);
+              .HasPrincipalKey(i => i.Id_Asignacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.ClienteDeuda)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.EstadoClienteDeuda)
               .WithMany(i => i.ClienteDeuda)
               .HasForeignKey(i => i.Id_Estado_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.ResultadoEvento)
               .WithMany(i => i.ClienteDeuda)
               .HasForeignKey(i => i.Id_Mejor_Gestion)
-              .HasPrincipalKey(i => i.Id_Resultado_Evento);
+              .HasPrincipalKey(i => i.Id_Resultado_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.Persona)
               .WithMany(i => i.ClienteDeuda)
               .HasForeignKey(i => i.Id_Persona)
-              .HasPrincipalKey(i => i.Id_Persona);
+              .HasPrincipalKey(i => i.Id_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.ResultadoEvento1)
               .WithMany(i => i.ClienteDeuda1)
               .HasForeignKey(i => i.Id_Ultima_Gestion)
-              .HasPrincipalKey(i => i.Id_Resultado_Evento);
+              .HasPrincipalKey(i => i.Id_Resultado_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.ClienteDeuda)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.ClienteDeuda1)
               .HasForeignKey(i => i.Id_Usuario_Asignado)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaCons>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.ClienteDeudaCons)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaCons>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.ClienteDeudaCons)
               .HasForeignKey(i => i.id_evento_mejor_gestion)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaCons>()
               .HasOne(i => i.Evento1)
               .WithMany(i => i.ClienteDeudaCons1)
               .HasForeignKey(i => i.id_evento_ultima_gestion)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaDato>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.ClienteDeudaDato)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaDato>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.ClienteDeudaDato)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaHonorario>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.ClienteDeudaHonorario)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaHonorario>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.ClienteDeudaHonorario)
               .HasForeignKey(i => i.id_evento_fin)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaHonorario>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.ClienteDeudaHonorario)
               .HasForeignKey(i => i.id_usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaUsuario>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.ClienteDeudaUsuario)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaUsuario>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.ClienteDeudaUsuario)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeudaUsuario>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.ClienteDeudaUsuario1)
               .HasForeignKey(i => i.Id_Usuario_Asignado)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.CoomultrasanCastigo>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.CoomultrasanCastigo)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.CoomultrasanJuridica>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.CoomultrasanJuridica)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.CoomultrasanLey79>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.CoomultrasanLey79)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.CoomultrasanTemprana>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.CoomultrasanTemprana)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Coopetrol>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Coopetrol)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Correspondencia>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.Correspondencia)
               .HasForeignKey(i => i.Id_Evento)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Credidos>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Credidos)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Credivalores>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Credivalores)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Credivalores2>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Credivalores2)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Credivaloresalt>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Credivaloresalt)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoClienteDeuda>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.DatoClienteDeuda)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.Departamento)
               .WithMany(i => i.DatoPersona)
               .HasForeignKey(i => i.Id_Departamento)
-              .HasPrincipalKey(i => i.Id_Departamento);
+              .HasPrincipalKey(i => i.Id_Departamento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.Municipio)
               .WithMany(i => i.DatoPersona)
               .HasForeignKey(i => i.Id_Municipio)
-              .HasPrincipalKey(i => i.Id_Municipio);
+              .HasPrincipalKey(i => i.Id_Municipio)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.Persona)
               .WithMany(i => i.DatoPersona)
               .HasForeignKey(i => i.Id_Persona)
-              .HasPrincipalKey(i => i.Id_Persona);
+              .HasPrincipalKey(i => i.Id_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.TipoDatoPersona)
               .WithMany(i => i.DatoPersona)
               .HasForeignKey(i => i.Id_Tipo_Dato_Persona)
-              .HasPrincipalKey(i => i.Id_Tipo_Dato_Persona);
+              .HasPrincipalKey(i => i.Id_Tipo_Dato_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.TipoVia)
               .WithMany(i => i.DatoPersona)
               .HasForeignKey(i => i.Id_Tipo_Via)
-              .HasPrincipalKey(i => i.Id_Tipo_Via);
+              .HasPrincipalKey(i => i.Id_Tipo_Via)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.ZonaUbicacion)
               .WithMany(i => i.DatoPersona)
               .HasForeignKey(i => i.Id_Zona_Ubicacion)
-              .HasPrincipalKey(i => i.Id_Zona_Ubicacion);
+              .HasPrincipalKey(i => i.Id_Zona_Ubicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.ZonaUbicacion1)
               .WithMany(i => i.DatoPersona1)
               .HasForeignKey(i => i.Id_Zona_Ubicacion_1)
-              .HasPrincipalKey(i => i.Id_Zona_Ubicacion);
+              .HasPrincipalKey(i => i.Id_Zona_Ubicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.ZonaUbicacion2)
               .WithMany(i => i.DatoPersona2)
               .HasForeignKey(i => i.Id_Zona_Ubicacion_2)
-              .HasPrincipalKey(i => i.Id_Zona_Ubicacion);
+              .HasPrincipalKey(i => i.Id_Zona_Ubicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DatoPersona>()
               .HasOne(i => i.ZonaUbicacion3)
               .WithMany(i => i.DatoPersona3)
               .HasForeignKey(i => i.Id_Zona_Ubicacion_3)
-              .HasPrincipalKey(i => i.Id_Zona_Ubicacion);
+              .HasPrincipalKey(i => i.Id_Zona_Ubicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DecisionEstado>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.DecisionEstado)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DecisionEstado>()
               .HasOne(i => i.EstadoClienteDeuda)
               .WithMany(i => i.DecisionEstado)
               .HasForeignKey(i => i.Id_Estado_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DecisionEstado>()
               .HasOne(i => i.ResultadoEvento)
               .WithMany(i => i.DecisionEstado)
               .HasForeignKey(i => i.Id_Resultado_Evento)
-              .HasPrincipalKey(i => i.Id_Resultado_Evento);
+              .HasPrincipalKey(i => i.Id_Resultado_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DecisionEstado>()
               .HasOne(i => i.TipoComunicacion)
               .WithMany(i => i.DecisionEstado)
               .HasForeignKey(i => i.Id_Tipo_Comunicacion)
-              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion);
+              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.DecisionEstado>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.DecisionEstado)
               .HasForeignKey(i => i.Id_Usuario_Creador)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.Aspnetusers)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.CreatedBy)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Clasificacion_Adicional)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional1)
               .WithMany(i => i.Evento1)
               .HasForeignKey(i => i.Id_Clasificacion_Adicional_1)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional2)
               .WithMany(i => i.Evento2)
               .HasForeignKey(i => i.Id_Clasificacion_Adicional_2)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.DatoPersona)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Dato_Persona)
-              .HasPrincipalKey(i => i.Id_Dato_Persona);
+              .HasPrincipalKey(i => i.Id_Dato_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional3)
               .WithMany(i => i.Evento3)
               .HasForeignKey(i => i.Id_Marca)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional4)
               .WithMany(i => i.Evento4)
               .HasForeignKey(i => i.Id_Medio_De_Pago)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional5)
               .WithMany(i => i.Evento5)
               .HasForeignKey(i => i.Id_Razon_Mora)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ClasificacionAdicional6)
               .WithMany(i => i.Evento6)
               .HasForeignKey(i => i.Id_Razones_Posible_Extracto)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.ResultadoEvento)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Resultado_Evento)
-              .HasPrincipalKey(i => i.Id_Resultado_Evento);
+              .HasPrincipalKey(i => i.Id_Resultado_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.Tarea)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Tarea)
-              .HasPrincipalKey(i => i.Id_Tarea);
+              .HasPrincipalKey(i => i.Id_Tarea)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.TipoComunicacion)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Tipo_Comunicacion)
-              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion);
+              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.Evento)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.Evento1)
               .HasForeignKey(i => i.Id_Usuario_Evento)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Evento>()
               .HasOne(i => i.Aspnetusers1)
               .WithMany(i => i.Evento1)
               .HasForeignKey(i => i.UpdatedBy)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.EventoArchivo>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.EventoArchivo)
               .HasForeignKey(i => i.id_evento)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.EventoArchivo>()
               .HasOne(i => i.TipoArchivo)
               .WithMany(i => i.EventoArchivo)
               .HasForeignKey(i => i.id_tipo_archivo)
-              .HasPrincipalKey(i => i.id_tipo_archivo);
+              .HasPrincipalKey(i => i.id_tipo_archivo)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.EventoDet>()
               .HasOne(i => i.ClasificacionAdicional)
               .WithMany(i => i.EventoDet)
               .HasForeignKey(i => i.Id_Contactado_Por)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.EventoDet>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.EventoDet)
               .HasForeignKey(i => i.id_evento)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.HonorarioAvvillas>()
               .HasOne(i => i.CampoHonorario)
               .WithMany(i => i.HonorarioAvvillas)
               .HasForeignKey(i => i.id_campo_honorario)
-              .HasPrincipalKey(i => i.id_campo_honorario);
+              .HasPrincipalKey(i => i.id_campo_honorario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.HonorarioAvvillas>()
               .HasOne(i => i.ClasificacionAdicional)
               .WithMany(i => i.HonorarioAvvillas)
               .HasForeignKey(i => i.id_clasificacion_honorario)
-              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional);
+              .HasPrincipalKey(i => i.Id_Clasificacion_Adicional)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.HonorarioAvvillas>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.HonorarioAvvillas)
               .HasForeignKey(i => i.id_cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.HonorarioAvvillas>()
               .HasOne(i => i.TipoRecaudo)
               .WithMany(i => i.HonorarioAvvillas)
               .HasForeignKey(i => i.id_tipo_recaudo)
-              .HasPrincipalKey(i => i.id_tipo_recaudo);
+              .HasPrincipalKey(i => i.id_tipo_recaudo)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.HonorarioAvvillas>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.HonorarioAvvillas)
               .HasForeignKey(i => i.id_usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Jamar>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Jamar)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogClienteDeudaEstado>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.LogClienteDeudaEstado)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogClienteDeudaEstado>()
               .HasOne(i => i.EstadoClienteDeuda)
               .WithMany(i => i.LogClienteDeudaEstado)
               .HasForeignKey(i => i.id_estado_cliente_deuda_act)
-              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogClienteDeudaEstado>()
               .HasOne(i => i.EstadoClienteDeuda1)
               .WithMany(i => i.LogClienteDeudaEstado1)
               .HasForeignKey(i => i.id_estado_cliente_deuda_ant)
-              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Estado_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogDatoPersona>()
               .HasOne(i => i.DatoPersona)
               .WithMany(i => i.LogDatoPersona)
               .HasForeignKey(i => i.id_dato_persona)
-              .HasPrincipalKey(i => i.Id_Dato_Persona);
+              .HasPrincipalKey(i => i.Id_Dato_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogDatoPersona>()
               .HasOne(i => i.Tarea)
               .WithMany(i => i.LogDatoPersona)
               .HasForeignKey(i => i.id_tarea)
-              .HasPrincipalKey(i => i.Id_Tarea);
+              .HasPrincipalKey(i => i.Id_Tarea)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogDatoPersona>()
               .HasOne(i => i.TipoDatoPersona)
               .WithMany(i => i.LogDatoPersona)
               .HasForeignKey(i => i.id_tipo_dato_persona_new)
-              .HasPrincipalKey(i => i.Id_Tipo_Dato_Persona);
+              .HasPrincipalKey(i => i.Id_Tipo_Dato_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogDatoPersona>()
               .HasOne(i => i.TipoDatoPersona1)
               .WithMany(i => i.LogDatoPersona1)
               .HasForeignKey(i => i.id_tipo_dato_persona_old)
-              .HasPrincipalKey(i => i.Id_Tipo_Dato_Persona);
+              .HasPrincipalKey(i => i.Id_Tipo_Dato_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.LogDatoPersona>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.LogDatoPersona)
               .HasForeignKey(i => i.id_usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MCita>()
               .HasOne(i => i.MEspecialidad)
               .WithMany(i => i.MCita)
               .HasForeignKey(i => i.IdEspecialidad)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MCita>()
               .HasOne(i => i.MEstadoCita)
               .WithMany(i => i.MCita)
               .HasForeignKey(i => i.IdEstado)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MCita>()
               .HasOne(i => i.MMedico)
               .WithMany(i => i.MCita)
               .HasForeignKey(i => i.IdMedico)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MCita>()
               .HasOne(i => i.Persona)
               .WithMany(i => i.MCita)
               .HasForeignKey(i => i.IdPersona)
-              .HasPrincipalKey(i => i.Id_Persona);
+              .HasPrincipalKey(i => i.Id_Persona)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MCita>()
               .HasOne(i => i.MSede)
               .WithMany(i => i.MCita)
               .HasForeignKey(i => i.IdSede)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MEspecialidadMedico>()
               .HasOne(i => i.MEspecialidad)
               .WithMany(i => i.MEspecialidadMedico)
               .HasForeignKey(i => i.IdEspecialidad)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MEspecialidadMedico>()
               .HasOne(i => i.MMedico)
               .WithMany(i => i.MEspecialidadMedico)
               .HasForeignKey(i => i.IdMedico)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Maf>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Maf)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Menco>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Menco)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Municipio>()
               .HasOne(i => i.Departamento)
               .WithMany(i => i.Municipio)
               .HasForeignKey(i => i.Id_Departamento)
-              .HasPrincipalKey(i => i.Id_Departamento);
+              .HasPrincipalKey(i => i.Id_Departamento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ParametroValor>()
               .HasOne(i => i.Parametro)
               .WithMany(i => i.ParametroValor)
               .HasForeignKey(i => i.Id_Parametro)
-              .HasPrincipalKey(i => i.Id_Parametro);
+              .HasPrincipalKey(i => i.Id_Parametro)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Persona>()
               .HasOne(i => i.TipoDocumento)
               .WithMany(i => i.Persona)
               .HasForeignKey(i => i.Id_Tipo_Documento)
-              .HasPrincipalKey(i => i.Id_Tipo_Documento);
+              .HasPrincipalKey(i => i.Id_Tipo_Documento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Promotora>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Promotora)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.Municipio)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.id_ciudad)
-              .HasPrincipalKey(i => i.Id_Municipio);
+              .HasPrincipalKey(i => i.Id_Municipio)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.Credivalores)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.id_credivalores)
-              .HasPrincipalKey(i => i.Id_Credivalores);
+              .HasPrincipalKey(i => i.Id_Credivalores)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.Franja)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.id_franja)
-              .HasPrincipalKey(i => i.id_franja);
+              .HasPrincipalKey(i => i.id_franja)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.TipoRediferido)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.id_tipo_rediferido)
-              .HasPrincipalKey(i => i.id_tipo_rediferido);
+              .HasPrincipalKey(i => i.id_tipo_rediferido)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.id_usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Rediferido>()
               .HasOne(i => i.Tasa1)
               .WithMany(i => i.Rediferido)
               .HasForeignKey(i => i.tasa)
-              .HasPrincipalKey(i => i.id_tasa);
+              .HasPrincipalKey(i => i.id_tasa)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.ResultadoEvento>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.ResultadoEvento)
               .HasForeignKey(i => i.id_cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Saludcoop>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Saludcoop)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Sms>()
               .HasOne(i => i.Evento)
               .WithMany(i => i.Sms)
               .HasForeignKey(i => i.Id_Evento)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.SubrepartoUsuario>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.SubrepartoUsuario)
               .HasForeignKey(i => i.IdUsuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.SubrepartoUsuario>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.SubrepartoUsuario1)
               .HasForeignKey(i => i.UsuarioActualizacion)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.SubrepartoUsuario>()
               .HasOne(i => i.Usuario2)
               .WithMany(i => i.SubrepartoUsuario2)
               .HasForeignKey(i => i.UsuarioCreacion)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.Aspnetusers)
               .WithMany(i => i.Tarea)
               .HasForeignKey(i => i.CreatedBy)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Tarea)
               .HasForeignKey(i => i.Id_Cliente_Deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.Evento1)
               .WithMany(i => i.Tarea1)
               .HasForeignKey(i => i.Id_Evento)
-              .HasPrincipalKey(i => i.Id_Evento);
+              .HasPrincipalKey(i => i.Id_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.TipoComunicacion)
               .WithMany(i => i.Tarea)
               .HasForeignKey(i => i.Id_Tipo_Comunicacion)
-              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion);
+              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.TipoTarea)
               .WithMany(i => i.Tarea)
               .HasForeignKey(i => i.id_tipo_tarea)
-              .HasPrincipalKey(i => i.id_tipo_tarea);
+              .HasPrincipalKey(i => i.id_tipo_tarea)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.Tarea)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.Usuario1)
               .WithMany(i => i.Tarea1)
               .HasForeignKey(i => i.Id_Usuario_Tarea)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.Aspnetusers1)
               .WithMany(i => i.Tarea1)
               .HasForeignKey(i => i.ProcessedBy)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tarea>()
               .HasOne(i => i.Aspnetusers2)
               .WithMany(i => i.Tarea2)
               .HasForeignKey(i => i.UpdatedBy)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tiempofuera>()
               .HasOne(i => i.Razontiempofuera)
               .WithMany(i => i.Tiempofuera)
               .HasForeignKey(i => i.IdRazonTiempoFuera)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Tiempofuera>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.Tiempofuera)
               .HasForeignKey(i => i.IdUsuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.TipoComunicacion>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.TipoComunicacion)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.TipoComunicacionResultadoEvento>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.TipoComunicacionResultadoEvento)
               .HasForeignKey(i => i.id_cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.TipoComunicacionResultadoEvento>()
               .HasOne(i => i.ResultadoEvento)
               .WithMany(i => i.TipoComunicacionResultadoEvento)
               .HasForeignKey(i => i.id_resultado_evento)
-              .HasPrincipalKey(i => i.Id_Resultado_Evento);
+              .HasPrincipalKey(i => i.Id_Resultado_Evento)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.TipoComunicacionResultadoEvento>()
               .HasOne(i => i.TipoComunicacion)
               .WithMany(i => i.TipoComunicacionResultadoEvento)
               .HasForeignKey(i => i.id_tipo_comunicacion)
-              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion);
+              .HasPrincipalKey(i => i.Id_Tipo_Comunicacion)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.TipoDatoPersona>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.TipoDatoPersona)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Transito>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Transito)
               .HasForeignKey(i => i.ID_CLIENTE_DEUDA)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Transitobuc>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Transitobuc)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Transitoflo>()
               .HasOne(i => i.ClienteDeuda)
               .WithMany(i => i.Transitoflo)
               .HasForeignKey(i => i.id_cliente_deuda)
-              .HasPrincipalKey(i => i.Id_Cliente_Deuda);
+              .HasPrincipalKey(i => i.Id_Cliente_Deuda)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Usuario>()
               .HasOne(i => i.EstadoUsuario)
               .WithMany(i => i.Usuario)
               .HasForeignKey(i => i.Estado)
-              .HasPrincipalKey(i => i.id_estado_usuario);
+              .HasPrincipalKey(i => i.id_estado_usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.UsuarioCliente>()
               .HasOne(i => i.Aspnetusers)
               .WithMany(i => i.UsuarioCliente)
               .HasForeignKey(i => i.AspNetUserId)
-              .HasPrincipalKey(i => i.Id);
+              .HasPrincipalKey(i => i.Id)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.UsuarioCliente>()
               .HasOne(i => i.Cliente)
               .WithMany(i => i.UsuarioCliente)
               .HasForeignKey(i => i.Id_Cliente)
-              .HasPrincipalKey(i => i.Id_Cliente);
+              .HasPrincipalKey(i => i.Id_Cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.UsuarioCliente>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.UsuarioCliente)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.UsuarioRol>()
               .HasOne(i => i.Rol)
               .WithMany(i => i.UsuarioRol)
               .HasForeignKey(i => i.Id_Rol)
-              .HasPrincipalKey(i => i.Id_Rol);
+              .HasPrincipalKey(i => i.Id_Rol)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.UsuarioRol>()
               .HasOne(i => i.Usuario)
               .WithMany(i => i.UsuarioRol)
               .HasForeignKey(i => i.Id_Usuario)
-              .HasPrincipalKey(i => i.Id_Usuario);
+              .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.Acueducto>()
               .Property(p => p.fecha_inicial)
@@ -1103,6 +1257,10 @@ namespace Reincarapp.Data
             builder.Entity<Reincarapp.Models.reincardb.Acueducto>()
               .Property(p => p.fecha_final)
               .HasColumnType("datetime");
+
+            builder.Entity<Reincarapp.Models.reincardb.Aspnetusers>()
+              .Property(p => p.LockoutEnd)
+              .HasColumnType("datetime(6)");
 
             builder.Entity<Reincarapp.Models.reincardb.Avvillas>()
               .Property(p => p.FECHA_COMPROM_CONTACT)
@@ -1500,10 +1658,6 @@ namespace Reincarapp.Data
               .Property(p => p.fecha_final)
               .HasColumnType("datetime");
 
-            builder.Entity<Reincarapp.Models.reincardb.Aspnetusers>()
-              .Property(p => p.LockoutEnd)
-              .HasColumnType("datetime(6)");
-
             builder.Entity<Reincarapp.Models.reincardb.AsigGestAux>()
               .Property(p => p.Porcentaje_Honorarios)
               .HasPrecision(8,2);
@@ -1679,6 +1833,8 @@ namespace Reincarapp.Data
         public DbSet<Reincarapp.Models.reincardb.Asignacion> Asignacion { get; set; }
 
         public DbSet<Reincarapp.Models.reincardb.AsignacionGestor> AsignacionGestor { get; set; }
+
+        public DbSet<Reincarapp.Models.reincardb.Aspnetusers> Aspnetusers { get; set; }
 
         public DbSet<Reincarapp.Models.reincardb.Avvillas> Avvillas { get; set; }
 
@@ -1967,11 +2123,10 @@ namespace Reincarapp.Data
         public DbSet<Reincarapp.Models.reincardb.ZzzTmpBorrarAvvillas1> ZzzTmpBorrarAvvillas1 { get; set; }
 
         public DbSet<Reincarapp.Models.reincardb.ZzzTmpToDelTransito> ZzzTmpToDelTransito { get; set; }
-
-        public DbSet<Reincarapp.Models.reincardb.Aspnetusers> Aspnetusers { get; set; }
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Conventions.Add(_ => new BlankTriggerAddingConvention());
+            configurationBuilder.Conventions.Remove(typeof(Microsoft.EntityFrameworkCore.Metadata.Conventions.CascadeDeleteConvention));
         }
     }
 }

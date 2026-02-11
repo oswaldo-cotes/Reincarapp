@@ -65,12 +65,12 @@
                         @* <RadzenButton Icon="add_circle_outline" Disabled="@addEvento" Click="@(args => { addEvento = !addEvento; size = addEvento ? 4 : 6; })" Variant="Variant.Flat" Style="margin-bottom: 10px;"/> *@
                     </Template>
                     <ChildContent>
-                        <Reincarapp.Pages.Transaccional.Gestionar.Evento.Eventos ClienteDeudaId="@ClienteDeudaId" IdNegocio="@IdNegocio" EnabledDisabledParent="@ChildFiredEvent" />
+                        <Reincarapp.Components.Pages.Transaccional.Gestionar.Evento.Eventos ClienteDeudaId="@ClienteDeudaId" IdNegocio="@IdNegocio" EnabledDisabledParent="@ChildFiredEvent" />
                     </ChildContent>
                     
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Tareas">
-                    <Reincarapp.Pages.Transaccional.Gestionar.Tareas.Tareas ClienteDeudaId="@ClienteDeudaId" />
+                    <Reincarapp.Components.Pages.Transaccional.Gestionar.Tareas.Tareas ClienteDeudaId="@ClienteDeudaId" />
                 </RadzenTabsItem>
 
             </Tabs>
@@ -99,7 +99,7 @@
 
     [Parameter]
     public Models.reincardb.ClienteDeuda registro { get; set; }
-
+        
     long ClienteDeudaId = 0;
     string IdNegocio = "";
 

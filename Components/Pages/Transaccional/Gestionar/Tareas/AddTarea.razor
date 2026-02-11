@@ -171,6 +171,7 @@
         {
 
             tarea.Fecha_Creacion_Tarea = DateTime.Now;
+            tarea.CreatedBy = securityService.User.UserName;
 
             await reincardbService.CreateTarea(tarea);
             DialogService.Close(tarea);

@@ -104,7 +104,7 @@
                     @foreach (var usuario in usuarios.Where(x => (selectedUsuarios == null || selectedUsuarios.Count() == 0 ? true : selectedUsuarios.Contains(x.Id_Usuario))))
                     {
 
-                        <Reincarapp.Pages.Transaccional.Gestionar.GraphProductividad userId="usuario" screen="dashboard" resultadosEvento="resultadoEventos" />
+                        <Reincarapp.Components.Pages.Transaccional.Gestionar.GraphProductividad userId="usuario" screen="dashboard" resultadosEvento="resultadoEventos" />
                     }
                 </RadzenColumn>
             </RadzenRow>

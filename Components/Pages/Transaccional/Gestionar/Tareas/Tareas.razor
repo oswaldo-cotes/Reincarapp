@@ -1,5 +1,8 @@
 @page "/tareas"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
 @using Reincarapp.Components.Pages.Transaccional.Gestionar.Evento
+@using Reincarapp.Data
 
 @attribute [Authorize]
 @inject IJSRuntime JSRuntime
@@ -9,6 +12,8 @@
 @inject TooltipService TooltipService
 @inject NotificationService NotificationService
 @inject reincardbService reincardbService
+@inject IDbContextFactory<reincardbContext> DbContextFactory
+@inject ILogger<Tareas> Logger
 
 <style>
     body {
@@ -345,245 +350,394 @@
     </RadzenRow>
     <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" />
     <RadzenRow>
-      <RadzenColumn SizeMD=12>
+        <RadzenColumn SizeMD=12>
             <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[] { 5, 10, 20, 30 }) style="height: 600px; overflow-y: auto;"
-            Data="@tareas"    TItem="Reincarapp.Models.reincardb.Tarea" RowDoubleClick="@EditRow" >
-            <Columns>
-                    
-                   @*  <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
-                        <Template Context="tarea">
-
-                            <RadzenButton ButtonStyle="@(tarea.Fecha_Ejecucion_Tarea == null ? ButtonStyle.Danger : ButtonStyle.Success)" Disabled="@(tarea.Fecha_Ejecucion_Tarea == null ? false : true)" Icon="@(tarea.Fecha_Ejecucion_Tarea == null ? "pending_actions" : "done_outline")" Size="ButtonSize.Medium"
-                                          Shade="Shade.Lighter" Variant="Variant.Flat"
-                                          Click=@(args => GridDeleteButtonClick(args, tarea)) @onclick:stopPropagation="true" />
-                        </Template>
-                    </RadzenDataGridColumn> *@
+                            Data="@tareas" TItem="Reincarapp.Models.reincardb.Tarea" RowDoubleClick="@EditRow">
+                <Columns>
                     <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Texto_Tarea" Title="Texto Tarea">
-
                         <Template>
                             <div class="col-lg-12">
                                 <div>
-                                    @* @if (Enumerable.Range(1, 8).Contains(context.ResultadoEvento?.Valor_Exito ?? 0))
-                                    {
-                                        <h5 class="card-title" style="color:green">@("Ranking: " + context.ResultadoEvento?.Valor_Exito)</h5> 
-                                        <h5 class="card-title" style="color:green">@("Ranking: " + context.Eventos1 == null ? 0 : (int)context.Eventos1?.Average(x => x.ResultadoEvento?.ValorExito ?? 0))</h5> 
-                                    }
-                                    else
-                                    {
-
-                                        <h5 class="card-title" style="color:red">@("Ranking: " + context.ResultadoEvento?.Valor_Exito)</h5> 
-                                          <h5 class="card-title" style="color:red">@("Ranking: " + context.Eventos1 == null ? 0 : (int)context.Eventos1?.Average(x => x.ResultadoEvento?.ValorExito ?? 0))</h5> 
-
-                                    } *@
                                     <div class="card-body pt-0">
                                         <div class="widget-49">
                                             <div class="widget-49-title-wrapper">
                                                 <div class="widget-49-date-primary">
-                                                    @*     <span class="widget-49-date-day">@(context.FechaCreacionEvento.Day)</span>
-                                                                <span class="widget-49-date-month">@(context.FechaCreacionEvento.ToString("MMM",System.Globalization.CultureInfo.InvariantCulture))</span> *@
-
-                                                       <RadzenStack>
-                                                                    @* <RadzenButton uttonStyle="@(EventoPendiente(context) ? ButtonStyle.Danger : ButtonStyle.Success)" Disabled="@(!EventoPendiente(context))" Icon="@(EventoPendiente(context) ? "pending_actions" : "done_outline")" Size="ButtonSize.Medium" Shade="Shade.Lighter" Variant="Variant.Flat" Click=@(args => GridDeleteButtonClick(args, context)) @onclick:stopPropagation="true" /> *@
-
-                                                        <RadzenButton ButtonStyle="@(context.Fecha_Ejecucion_Tarea == null ? ButtonStyle.Danger : ButtonStyle.Success)" Disabled="@(context.Fecha_Ejecucion_Tarea == null ? false : true)" Icon="@(context.Fecha_Ejecucion_Tarea == null ? "pending_actions" : "done_outline")" Size="ButtonSize.Medium"
-                                                                      Shade="Shade.Lighter" Variant="Variant.Flat"
-                                                                      Click=@(args => GridDeleteButtonClick(args, context)) @onclick:stopPropagation="true" />
-
-                                                                </RadzenStack> 
-
-                            
-
-
-
+                                                    <RadzenStack>
+                                                        <RadzenButton ButtonStyle="@(context.Fecha_Ejecucion_Tarea == null ? ButtonStyle.Danger : ButtonStyle.Success)" 
+                                                                      Disabled="@(context.Fecha_Ejecucion_Tarea != null)" 
+                                                                      Icon="@(context.Fecha_Ejecucion_Tarea == null ? "pending_actions" : "done_outline")" 
+                                                                      Size="ButtonSize.Medium"
+                                                                      Shade="Shade.Lighter" 
+                                                                      Variant="Variant.Flat"
+                                                                      Click=@(args => GridDeleteButtonClick(args, context)) 
+                                                                      @onclick:stopPropagation="true" />
+                                                    </RadzenStack>
                                                 </div>
                                                 <div class="widget-49-meeting-info">
-                                                    @* <span class="widget-49-pro-title">@(context.ResultadoEvento?.Nombre_Resultado_Evento)</span> *@
                                                     <span class="widget-49-meeting-time">@("Creado En:" + context.Fecha_Creacion_Tarea.ToString("dd/MM/yyyy hh:mm tt", System.Globalization.CultureInfo.InvariantCulture) + ", Compromiso para:" + context.Fecha_Ejecucion_Tarea?.ToString("dd/MM/yyyy hh:mm tt", System.Globalization.CultureInfo.InvariantCulture))</span>
                                                 </div>
                                             </div>
                                             <ol class="widget-49-meeting-points">
                                                 <li class="widget-49-meeting-item"><span style="white-space:pre-wrap; width:100%;font-size: medium;font-weight: bolder ;">@(context.Texto_Tarea)</span></li>
                                                 <li class="widget-49-meeting-item"><span style="white-space:pre-wrap; width:100%">@("Creado Por: " + context.Usuario1?.Nombre_Usuario)</span></li>
-                                              @*   @foreach (var e in context.EventoArchivos)
-
-                                                {
-
-                                                    <li class="widget-49-meeting-item">
-                                                        <span>
-                                                            @(e.nomb_archivo_ext)
-                                                             <RadzenButton Click=@(args => OnClick(e.nomb_archivo_ext + "|" +e.id_tipo_archivo.ToString())) Icon="download" ButtonStyle="ButtonStyle.Primary" Style="" />
-                                                        </span>
-                                                    </li>
-
-
-                                                } *@
-
-
-                                                @*      <li class="widget-49-meeting-item"><span>Data migration is in scope</span></li>
-                                                            <li class="widget-49-meeting-item"><span>Session timeout increase to 30 minutes</span></li> *@
                                             </ol>
-                                            @* <div class="widget-49-meeting-action">
-                                                        <a href="#" class="btn btn-sm btn-flash-border-primary">View All</a>
-                                                        </div> *@
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </Template>
-
-
-                </RadzenDataGridColumn>
-               @*      <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="monto" Title="monto">
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Fecha_Realizacion_Tarea" Title="Fecha Realizacion Tarea">
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Fecha_Creacion_Tarea" Title="Fecha Creacion Tarea">
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Fecha_Ejecucion_Tarea" Title="Fecha Ejecucion Tarea">
-                </RadzenDataGridColumn> *@
-             
-             @*    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="ClienteDeudum.campana_reparto" Title="Cliente Deudum">
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Evento.Texto_Evento" Title="Evento">
-                </RadzenDataGridColumn> *@
-             @*    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="TipoComunicacion.Nombre_Tipo_COmunicacion" Title="Tipo Comunicacion">
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="TipoTarea.nombre" Title="Tipo Tarea">
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Usuario.Nombre_Usuario" Title="Usuario">
-                </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Tarea" Property="Usuario1.Nombre_Usuario" Title="Usuario1">
-                    </RadzenDataGridColumn> *@
-               
-            </Columns>
-
-        </RadzenDataGrid>
-
-    </RadzenColumn>
-  </RadzenRow>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
 </RadzenStack>
+
 @code {
-
     protected IEnumerable<Reincarapp.Models.reincardb.Tarea> tareas;
-
     protected RadzenDataGrid<Reincarapp.Models.reincardb.Tarea> grid0;
-
     protected string search = "";
+    private bool _isLoading = false;
 
     [Parameter]
     public decimal ClienteDeudaId { get; set; }
 
-    protected async Task Search(ChangeEventArgs args)
-    {
-        search = $"{args.Value}";
-
-        await grid0.GoToPage(0);
-
-        tareas = await reincardbService.GetTarea(new Query { Filter = $@"i => i.Texto_Tarea.Contains(@0)  && i.id_cliente_deuda == @1", FilterParameters = new object[] { search,ClienteDeudaId }, Expand = "ClienteDeudum,Evento,TipoComunicacion,TipoTarea,Usuario,Usuario1"});
-    }
     protected override async Task OnInitializedAsync()
     {
-
-
-
-
+        try
+        {
+            Logger.LogInformation("Inicializando componente Tareas para ClienteDeudaId: {ClienteDeudaId}", ClienteDeudaId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al inicializar componente Tareas");
+            await ShowErrorNotification("Error de inicialización", ex.Message);
+        }
     }
-
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await Task.Delay(1000);
-            tareas = await reincardbService.GetTarea(new Query { Filter = $@"i => i.id_cliente_deuda == @0", FilterParameters = new object[] { ClienteDeudaId }, Expand = "ClienteDeudum,Evento,TipoComunicacion,TipoTarea,Usuario,Usuario1" });
-            //await grid0.Reload();
-            this.StateHasChanged();
+            try
+            {
+                Logger.LogInformation("OnAfterRenderAsync - Primera renderización para ClienteDeudaId: {ClienteDeudaId}", ClienteDeudaId);
 
+                await Task.Delay(100);
+                await LoadData(null);
+                
+                await InvokeAsync(() => StateHasChanged());
 
+                Logger.LogInformation("OnAfterRenderAsync completado exitosamente");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error en OnAfterRenderAsync para ClienteDeudaId: {ClienteDeudaId}", ClienteDeudaId);
+                await ShowErrorNotification("Error al cargar tareas", ex.Message);
+            }
+        }
+    }
 
+    protected async Task Search(ChangeEventArgs args)
+    {
+        try
+        {
+            search = $"{args.Value}";
+            Logger.LogInformation("Búsqueda de tareas iniciada con término: {SearchTerm}", search);
+
+            if (grid0 != null)
+            {
+                await grid0.GoToPage(0);
+            }
+
+            await LoadData(search);
+
+            Logger.LogInformation("Búsqueda completada. Resultados: {Count}", tareas?.Count() ?? 0);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error en búsqueda de tareas con término: {SearchTerm}", search);
+            await ShowErrorNotification("Error en búsqueda", ex.Message);
+        }
+    }
+
+    private async Task LoadData(string searchValue)
+    {
+        try
+        {
+            if (_isLoading)
+            {
+                Logger.LogWarning("LoadData ya está en ejecución, omitiendo llamada duplicada");
+                return;
+            }
+
+            _isLoading = true;
+
+            Logger.LogInformation("Cargando tareas para ClienteDeudaId: {ClienteDeudaId}, SearchValue: {SearchValue}", 
+                ClienteDeudaId, searchValue ?? "null");
+
+            using var context = await DbContextFactory.CreateDbContextAsync();
+
+            var query = context.Tarea
+                .AsNoTracking()
+                .Include(x => x.ClienteDeuda)
+                .Include(x => x.Aspnetusers1)
+                .Include(x => x.Aspnetusers2)
+                .Include(x => x.Evento)
+                .Include(x => x.TipoComunicacion)
+                .Include(x => x.TipoTarea)
+                .Include(x => x.Usuario)
+                .Include(x => x.Usuario1)
+                .Where(x => x.Id_Cliente_Deuda == ClienteDeudaId);
+
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                query = query.Where(x => x.Texto_Tarea.Contains(searchValue));
+            }
+
+            tareas = await query.ToListAsync();
+
+            Logger.LogInformation("Tareas cargadas exitosamente. Total: {Count}", tareas?.Count() ?? 0);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al cargar tareas para ClienteDeudaId: {ClienteDeudaId}, SearchValue: {SearchValue}", 
+                ClienteDeudaId, searchValue);
+            
+            tareas = Enumerable.Empty<Reincarapp.Models.reincardb.Tarea>();
+            await ShowErrorNotification("Error al cargar tareas", ex.Message);
+        }
+        finally
+        {
+            _isLoading = false;
         }
     }
 
     protected async Task AddButtonClick(MouseEventArgs args)
     {
-        await DialogService.OpenAsync<AddTarea>("Add Tarea", new Dictionary<string, object> { { "ClienteDeudaId", ClienteDeudaId } });
-        await grid0.Reload();
+        try
+        {
+            Logger.LogInformation("Abriendo diálogo para agregar nueva tarea. ClienteDeudaId: {ClienteDeudaId}", ClienteDeudaId);
+
+            await DialogService.OpenAsync<AddTarea>(
+                "Add Tarea",
+                new Dictionary<string, object> { { "ClienteDeudaId", ClienteDeudaId } }
+            );
+
+            Logger.LogInformation("Diálogo cerrado, recargando tareas");
+            
+            await LoadData(search);
+            
+            if (grid0 != null)
+            {
+                await grid0.Reload();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al agregar tarea para ClienteDeudaId: {ClienteDeudaId}", ClienteDeudaId);
+            await ShowErrorNotification("Error al agregar tarea", ex.Message);
+        }
     }
 
     protected async Task EditRow(DataGridRowMouseEventArgs<Reincarapp.Models.reincardb.Tarea> args)
     {
-        await DialogService.OpenAsync<EditTarea>("Edit Tarea", new Dictionary<string, object> { {"Id_Tarea", args.Data.Id_Tarea} });
+        try
+        {
+            if (args?.Data == null)
+            {
+                Logger.LogWarning("EditRow llamado con datos null");
+                return;
+            }
+
+            Logger.LogInformation("Abriendo diálogo de edición para Tarea: {IdTarea}", args.Data.Id_Tarea);
+
+            await DialogService.OpenAsync<EditTarea>(
+                "Edit Tarea",
+                new Dictionary<string, object> { { "Id_Tarea", args.Data.Id_Tarea } }
+            );
+
+            Logger.LogInformation("Diálogo cerrado, recargando tareas");
+            
+            await LoadData(search);
+            
+            if (grid0 != null)
+            {
+                await grid0.Reload();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al editar tarea: {IdTarea}", args?.Data?.Id_Tarea);
+            await ShowErrorNotification("Error al editar tarea", ex.Message);
+        }
     }
 
     protected async Task GridDeleteButtonClick(MouseEventArgs args, Reincarapp.Models.reincardb.Tarea tarea)
     {
         try
         {
+            if (tarea == null)
+            {
+                Logger.LogWarning("GridDeleteButtonClick llamado con tarea null");
+                return;
+            }
 
+            Logger.LogInformation("Abriendo diálogo de evento para completar tarea: {IdTarea}", tarea.Id_Tarea);
 
-            var res = await DialogService.OpenAsync<Evento.AddEvento>("Add Evento", new Dictionary<string, object> { { "ClienteDeudaId", tarea.Id_Cliente_Deuda }, { "IdNegocio", "" }, { "IdTarea", tarea.Id_Tarea },{"screen","tarea" } }, new DialogOptions() { Draggable = true, Width = "700px", Height = "800px" });
+            var res = await DialogService.OpenAsync<AddEvento>(
+                "Add Evento",
+                new Dictionary<string, object> 
+                { 
+                    { "ClienteDeudaId", tarea.Id_Cliente_Deuda }, 
+                    { "IdNegocio", "" }, 
+                    { "IdTarea", tarea.Id_Tarea },
+                    { "screen", "tarea" } 
+                },
+                new DialogOptions() { Draggable = true, Width = "700px", Height = "800px" }
+            );
 
             if (res != null)
             {
+                Logger.LogInformation("Evento creado, actualizando tarea: {IdTarea}", (object)res.Id_Tarea);
 
-                 var t = await reincardbService.GetTareaByIdTarea(res.Id_Tarea);
-                 var tareas_ = tareas.ToList();
-                 var idx = tareas_.FindIndex(x => x.Id_Tarea == t.Id_Tarea);
-                 tareas_.RemoveAt(idx);
-                 tareas_.Insert(idx, t);
-                 tareas = tareas_;
+                var tareaActualizada = await reincardbService.GetTareaByIdTarea(res.Id_Tarea);
+                
+                if (tareaActualizada != null)
+                {
+                    var tareasList = tareas.ToList();
+                    var idx = tareasList.FindIndex(x => x.Id_Tarea == tareaActualizada.Id_Tarea);
+                    
+                    if (idx >= 0)
+                    {
+                        tareasList.RemoveAt(idx);
+                        tareasList.Insert(idx, tareaActualizada);
+                        tareas = tareasList;
+                    }
 
+                    if (grid0 != null)
+                    {
+                        await grid0.Reload();
+                    }
 
-                await grid0.Reload();
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Éxito",
+                        Detail = "Tarea actualizada correctamente",
+                        Duration = 3000
+                    });
+                }
 
+                Logger.LogInformation("Tarea actualizada exitosamente");
             }
-
-           
-
-
-            // if (await DialogService.Confirm("Are you sure you want to delete this record?") == true)
-            // {
-            //     var deleteResult = await reincardbService.DeleteTarea(tarea.Id_Tarea);
-
-            //     if (deleteResult != null)
-            //     {
-            //         await grid0.Reload();
-            //     }
-            // }
+            else
+            {
+                Logger.LogInformation("Usuario canceló la creación del evento");
+            }
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error al procesar tarea: {IdTarea}", tarea?.Id_Tarea);
+            
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Error,
-                Summary = $"Error",
-                Detail = $"Unable to delete Tarea"
+                Summary = "Error",
+                Detail = $"No se pudo procesar la tarea: {ex.Message}",
+                Duration = 5000
             });
         }
     }
 
     protected async Task ExportClick(RadzenSplitButtonItem args)
     {
-        if (args?.Value == "csv")
+        try
         {
-            await reincardbService.ExportTareaToCSV(new Query
-{
-    Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
-    OrderBy = $"{grid0.Query.OrderBy}",
-    Expand = "ClienteDeudum,Evento,TipoComunicacion,TipoTarea,Usuario,Usuario1",
-    Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
-}, "Tareas");
-        }
+            Logger.LogInformation("Exportando tareas a formato: {Format}", args?.Value ?? "xlsx");
 
-        if (args == null || args.Value == "xlsx")
+            if (grid0 == null)
+            {
+                Logger.LogWarning("Grid no está inicializado para exportación");
+                await ShowWarningNotification("Error de exportación", "No hay datos para exportar");
+                return;
+            }
+
+            var query = new Query
+            {
+                Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter) ? "true" : grid0.Query.Filter)}",
+                OrderBy = $"{grid0.Query.OrderBy}",
+                Expand = "ClienteDeudum,Evento,TipoComunicacion,TipoTarea,Usuario,Usuario1",
+                Select = string.Join(",", grid0.ColumnsCollection
+                    .Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property))
+                    .Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
+            };
+
+            if (args?.Value == "csv")
+            {
+                await reincardbService.ExportTareaToCSV(query, "Tareas");
+                Logger.LogInformation("Exportación a CSV completada exitosamente");
+            }
+            else
+            {
+                await reincardbService.ExportTareaToExcel(query, "Tareas");
+                Logger.LogInformation("Exportación a Excel completada exitosamente");
+            }
+
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Exportación exitosa",
+                Detail = "Los datos se han exportado correctamente",
+                Duration = 3000
+            });
+        }
+        catch (Exception ex)
         {
-            await reincardbService.ExportTareaToExcel(new Query
-{
-    Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
-    OrderBy = $"{grid0.Query.OrderBy}",
-    Expand = "ClienteDeudum,Evento,TipoComunicacion,TipoTarea,Usuario,Usuario1",
-    Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
-}, "Tareas");
+                    Logger.LogError(ex, "Error al exportar tareas a formato: {Format}", args?.Value ?? "xlsx");
+            await ShowErrorNotification("Error al exportar", ex.Message);
+        }
+    }
+
+    private async Task ShowErrorNotification(string summary, string detail)
+    {
+        try
+        {
+            await InvokeAsync(() =>
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = summary,
+                    Detail = detail,
+                    Duration = 5000
+                });
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al mostrar notificación de error");
+        }
+    }
+
+    private async Task ShowWarningNotification(string summary, string detail)
+    {
+        try
+        {
+            await InvokeAsync(() =>
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = summary,
+                    Detail = detail,
+                    Duration = 4000
+                });
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error al mostrar notificación de advertencia");
         }
     }
 }

@@ -437,7 +437,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Asignacion
                               .Where(i => i.Id_Asignacion == idasignacion)
-                              .Include(i => i.ClienteDeuda)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -628,6 +627,167 @@ namespace Reincarapp
             }
 
             OnAfterAsignacionGestorDeleted(itemToDelete);
+
+            return itemToDelete;
+        }
+    
+        public async Task ExportAspnetusersToExcel(Query query = null, string fileName = null)
+        {
+            navigationManager.NavigateTo(query != null ? query.ToUrl($"export/reincardb/aspnetusers/excel(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')") : $"export/reincardb/aspnetusers/excel(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')", true);
+        }
+
+        public async Task ExportAspnetusersToCSV(Query query = null, string fileName = null)
+        {
+            navigationManager.NavigateTo(query != null ? query.ToUrl($"export/reincardb/aspnetusers/csv(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')") : $"export/reincardb/aspnetusers/csv(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')", true);
+        }
+
+        partial void OnAspnetusersRead(ref IQueryable<Reincarapp.Models.reincardb.Aspnetusers> items);
+
+        public async Task<IQueryable<Reincarapp.Models.reincardb.Aspnetusers>> GetAspnetusers(Query query = null)
+        {
+            var items = Context.Aspnetusers.AsQueryable();
+
+
+            if (query != null)
+            {
+                if (!string.IsNullOrEmpty(query.Expand))
+                {
+                    var propertiesToExpand = query.Expand.Split(',');
+                    foreach(var p in propertiesToExpand)
+                    {
+                        items = items.Include(p.Trim());
+                    }
+                }
+
+                ApplyQuery(ref items, query);
+            }
+
+            OnAspnetusersRead(ref items);
+
+            return await Task.FromResult(items);
+        }
+
+        partial void OnAspnetusersGet(Reincarapp.Models.reincardb.Aspnetusers item);
+        partial void OnGetAspnetusersById(ref IQueryable<Reincarapp.Models.reincardb.Aspnetusers> items);
+
+
+        public async Task<Reincarapp.Models.reincardb.Aspnetusers> GetAspnetusersById(string id)
+        {
+            var items = Context.Aspnetusers
+                              .AsNoTracking()
+                              .Where(i => i.Id == id);
+
+ 
+            OnGetAspnetusersById(ref items);
+
+            var itemToReturn = items.FirstOrDefault();
+
+            OnAspnetusersGet(itemToReturn);
+
+            return await Task.FromResult(itemToReturn);
+        }
+
+        partial void OnAspnetusersCreated(Reincarapp.Models.reincardb.Aspnetusers item);
+        partial void OnAfterAspnetusersCreated(Reincarapp.Models.reincardb.Aspnetusers item);
+
+        public async Task<Reincarapp.Models.reincardb.Aspnetusers> CreateAspnetusers(Reincarapp.Models.reincardb.Aspnetusers aspnetusers)
+        {
+            OnAspnetusersCreated(aspnetusers);
+
+            var existingItem = Context.Aspnetusers
+                              .Where(i => i.Id == aspnetusers.Id)
+                              .FirstOrDefault();
+
+            if (existingItem != null)
+            {
+               throw new Exception("Item already available");
+            }            
+
+            try
+            {
+                Context.Aspnetusers.Add(aspnetusers);
+                Context.SaveChanges();
+            }
+            catch
+            {
+                Context.Entry(aspnetusers).State = EntityState.Detached;
+                throw;
+            }
+
+            OnAfterAspnetusersCreated(aspnetusers);
+
+            return aspnetusers;
+        }
+
+        public async Task<Reincarapp.Models.reincardb.Aspnetusers> CancelAspnetusersChanges(Reincarapp.Models.reincardb.Aspnetusers item)
+        {
+            var entityToCancel = Context.Entry(item);
+            if (entityToCancel.State == EntityState.Modified)
+            {
+              entityToCancel.CurrentValues.SetValues(entityToCancel.OriginalValues);
+              entityToCancel.State = EntityState.Unchanged;
+            }
+
+            return item;
+        }
+
+        partial void OnAspnetusersUpdated(Reincarapp.Models.reincardb.Aspnetusers item);
+        partial void OnAfterAspnetusersUpdated(Reincarapp.Models.reincardb.Aspnetusers item);
+
+        public async Task<Reincarapp.Models.reincardb.Aspnetusers> UpdateAspnetusers(string id, Reincarapp.Models.reincardb.Aspnetusers aspnetusers)
+        {
+            OnAspnetusersUpdated(aspnetusers);
+
+            var itemToUpdate = Context.Aspnetusers
+                              .Where(i => i.Id == aspnetusers.Id)
+                              .FirstOrDefault();
+
+            if (itemToUpdate == null)
+            {
+               throw new Exception("Item no longer available");
+            }
+                
+            var entryToUpdate = Context.Entry(itemToUpdate);
+            entryToUpdate.CurrentValues.SetValues(aspnetusers);
+            entryToUpdate.State = EntityState.Modified;
+
+            Context.SaveChanges();
+
+            OnAfterAspnetusersUpdated(aspnetusers);
+
+            return aspnetusers;
+        }
+
+        partial void OnAspnetusersDeleted(Reincarapp.Models.reincardb.Aspnetusers item);
+        partial void OnAfterAspnetusersDeleted(Reincarapp.Models.reincardb.Aspnetusers item);
+
+        public async Task<Reincarapp.Models.reincardb.Aspnetusers> DeleteAspnetusers(string id)
+        {
+            var itemToDelete = Context.Aspnetusers
+                              .Where(i => i.Id == id)
+                              .FirstOrDefault();
+
+            if (itemToDelete == null)
+            {
+               throw new Exception("Item no longer available");
+            }
+
+            OnAspnetusersDeleted(itemToDelete);
+
+
+            Context.Aspnetusers.Remove(itemToDelete);
+
+            try
+            {
+                Context.SaveChanges();
+            }
+            catch
+            {
+                Context.Entry(itemToDelete).State = EntityState.Unchanged;
+                throw;
+            }
+
+            OnAfterAspnetusersDeleted(itemToDelete);
 
             return itemToDelete;
         }
@@ -1426,7 +1586,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Base
                               .Where(i => i.Id == id)
-                              .Include(i => i.Basecampo)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -2121,7 +2280,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.CampoHonorario
                               .Where(i => i.id_campo_honorario == idcampohonorario)
-                              .Include(i => i.HonorarioAvvillas)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -2283,7 +2441,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Campoclave
                               .Where(i => i.Id == id)
-                              .Include(i => i.Basecampo)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -3334,15 +3491,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.ClasificacionAdicional
                               .Where(i => i.Id_Clasificacion_Adicional == idclasificacionadicional)
-                              .Include(i => i.Evento)
-                              .Include(i => i.Evento1)
-                              .Include(i => i.Evento2)
-                              .Include(i => i.Evento3)
-                              .Include(i => i.Evento4)
-                              .Include(i => i.Evento5)
-                              .Include(i => i.Evento6)
-                              .Include(i => i.EventoDet)
-                              .Include(i => i.HonorarioAvvillas)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -4792,18 +4940,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Cliente
                               .Where(i => i.Id_Cliente == idcliente)
-                              .Include(i => i.Base)
-                              .Include(i => i.CampoHonorario)
-                              .Include(i => i.ClasificacionAdicional)
-                              .Include(i => i.ClienteDeuda)
-                              .Include(i => i.ClienteDeudaDato)
-                              .Include(i => i.DecisionEstado)
-                              .Include(i => i.HonorarioAvvillas)
-                              .Include(i => i.ResultadoEvento)
-                              .Include(i => i.TipoComunicacion)
-                              .Include(i => i.TipoComunicacionResultadoEvento)
-                              .Include(i => i.TipoDatoPersona)
-                              .Include(i => i.UsuarioCliente)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -4981,43 +5117,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.ClienteDeuda
                               .Where(i => i.Id_Cliente_Deuda == idclientedeuda)
-                              .Include(i => i.Acueducto)
-                              .Include(i => i.Avvillas)
-                              .Include(i => i.Avvillasbuc)
-                              .Include(i => i.Bancobogota)
-                              .Include(i => i.Bancoomeva)
-                              .Include(i => i.BaseJuridica)
-                              .Include(i => i.Bloqueocontacto)
-                              .Include(i => i.Censprejuridico)
-                              .Include(i => i.Checprejuridico)
-                              .Include(i => i.Citibank)
-                              .Include(i => i.Citibank2)
-                              .Include(i => i.ClienteDeudaCons)
-                              .Include(i => i.ClienteDeudaDato)
-                              .Include(i => i.ClienteDeudaHonorario)
-                              .Include(i => i.ClienteDeudaUsuario)
-                              .Include(i => i.CoomultrasanCastigo)
-                              .Include(i => i.CoomultrasanJuridica)
-                              .Include(i => i.CoomultrasanLey79)
-                              .Include(i => i.CoomultrasanTemprana)
-                              .Include(i => i.Coopetrol)
-                              .Include(i => i.Credidos)
-                              .Include(i => i.Credivalores)
-                              .Include(i => i.Credivalores2)
-                              .Include(i => i.Credivaloresalt)
-                              .Include(i => i.DatoClienteDeuda)
-                              .Include(i => i.Evento)
-                              .Include(i => i.Jamar)
-                              .Include(i => i.LogClienteDeudaEstado)
-                              .Include(i => i.Maf)
-                              .Include(i => i.Menco)
-                              .Include(i => i.Promotora)
-                              .Include(i => i.Rediferido)
-                              .Include(i => i.Saludcoop)
-                              .Include(i => i.Tarea)
-                              .Include(i => i.Transito)
-                              .Include(i => i.Transitobuc)
-                              .Include(i => i.Transitoflo)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -8314,7 +8413,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Credivalores
                               .Where(i => i.Id_Credivalores == idcredivalores)
-                              .Include(i => i.Rediferido)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -8983,8 +9081,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.DatoPersona
                               .Where(i => i.Id_Dato_Persona == iddatopersona)
-                              .Include(i => i.Evento)
-                              .Include(i => i.LogDatoPersona)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -9317,8 +9413,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Departamento
                               .Where(i => i.Id_Departamento == iddepartamento)
-                              .Include(i => i.DatoPersona)
-                              .Include(i => i.Municipio)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -9677,10 +9771,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.EstadoClienteDeuda
                               .Where(i => i.Id_Estado_Cliente_Deuda == idestadoclientedeuda)
-                              .Include(i => i.ClienteDeuda)
-                              .Include(i => i.DecisionEstado)
-                              .Include(i => i.LogClienteDeudaEstado)
-                              .Include(i => i.LogClienteDeudaEstado1)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -9842,7 +9932,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.EstadoUsuario
                               .Where(i => i.id_estado_usuario == idestadousuario)
-                              .Include(i => i.Usuario)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -10036,15 +10125,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Evento
                               .Where(i => i.Id_Evento == idevento)
-                              .Include(i => i.Bloqueocontacto)
-                              .Include(i => i.ClienteDeudaCons)
-                              .Include(i => i.ClienteDeudaCons1)
-                              .Include(i => i.ClienteDeudaHonorario)
-                              .Include(i => i.Correspondencia)
-                              .Include(i => i.EventoArchivo)
-                              .Include(i => i.EventoDet)
-                              .Include(i => i.Sms)
-                              .Include(i => i.Tarea1)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -10536,7 +10616,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Franja
                               .Where(i => i.id_franja == idfranja)
-                              .Include(i => i.Rediferido)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -11971,8 +12050,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.MEspecialidad
                               .Where(i => i.Id == id)
-                              .Include(i => i.MCita)
-                              .Include(i => i.MEspecialidadMedico)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -12299,7 +12376,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.MEstadoCita
                               .Where(i => i.Id == id)
-                              .Include(i => i.MCita)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -12461,8 +12537,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.MMedico
                               .Where(i => i.Id == id)
-                              .Include(i => i.MCita)
-                              .Include(i => i.MEspecialidadMedico)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -12624,7 +12698,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.MSede
                               .Where(i => i.Id == id)
-                              .Include(i => i.MCita)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -13114,8 +13187,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Municipio
                               .Where(i => i.Id_Municipio == idmunicipio)
-                              .Include(i => i.DatoPersona)
-                              .Include(i => i.Rediferido)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -13277,7 +13348,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Parametro
                               .Where(i => i.Id_Parametro == idparametro)
-                              .Include(i => i.ParametroValor)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -13604,10 +13674,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Persona
                               .Where(i => i.Id_Persona == idpersona)
-                              .Include(i => i.AsignacionGestor)
-                              .Include(i => i.ClienteDeuda)
-                              .Include(i => i.DatoPersona)
-                              .Include(i => i.MCita)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -13932,7 +13998,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Razontiempofuera
                               .Where(i => i.Id == id)
-                              .Include(i => i.Tiempofuera)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -14343,11 +14408,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.ResultadoEvento
                               .Where(i => i.Id_Resultado_Evento == idresultadoevento)
-                              .Include(i => i.ClienteDeuda)
-                              .Include(i => i.ClienteDeuda1)
-                              .Include(i => i.DecisionEstado)
-                              .Include(i => i.Evento)
-                              .Include(i => i.TipoComunicacionResultadoEvento)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -14509,7 +14569,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Rol
                               .Where(i => i.Id_Rol == idrol)
-                              .Include(i => i.UsuarioRol)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -15343,8 +15402,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Tarea
                               .Where(i => i.Id_Tarea == idtarea)
-                              .Include(i => i.Evento)
-                              .Include(i => i.LogDatoPersona)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -15506,7 +15563,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Tasa
                               .Where(i => i.id_tasa == idtasa)
-                              .Include(i => i.Rediferido)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -16424,7 +16480,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoArchivo
                               .Where(i => i.id_tipo_archivo == idtipoarchivo)
-                              .Include(i => i.EventoArchivo)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -16586,7 +16641,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoClasificacionAdicional
                               .Where(i => i.Id_Tipo_Clasificacion_Adicional == idtipoclasificacionadicional)
-                              .Include(i => i.ClasificacionAdicional)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -16911,10 +16965,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoComunicacion
                               .Where(i => i.Id_Tipo_Comunicacion == idtipocomunicacion)
-                              .Include(i => i.DecisionEstado)
-                              .Include(i => i.Evento)
-                              .Include(i => i.Tarea)
-                              .Include(i => i.TipoComunicacionResultadoEvento)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -17245,9 +17295,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoDatoPersona
                               .Where(i => i.Id_Tipo_Dato_Persona == idtipodatopersona)
-                              .Include(i => i.DatoPersona)
-                              .Include(i => i.LogDatoPersona)
-                              .Include(i => i.LogDatoPersona1)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -17409,7 +17456,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoDocumento
                               .Where(i => i.Id_Tipo_Documento == idtipodocumento)
-                              .Include(i => i.Persona)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -17571,7 +17617,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoRecaudo
                               .Where(i => i.id_tipo_recaudo == idtiporecaudo)
-                              .Include(i => i.HonorarioAvvillas)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -17733,7 +17778,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoRediferido
                               .Where(i => i.id_tipo_rediferido == idtiporediferido)
-                              .Include(i => i.Rediferido)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -17895,7 +17939,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoTarea
                               .Where(i => i.id_tipo_tarea == idtipotarea)
-                              .Include(i => i.Tarea)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -18057,7 +18100,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.TipoVia
                               .Where(i => i.Id_Tipo_Via == idtipovia)
-                              .Include(i => i.DatoPersona)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -18219,7 +18261,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Tipobase
                               .Where(i => i.Id == id)
-                              .Include(i => i.Base)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -19446,30 +19487,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.Usuario
                               .Where(i => i.Id_Usuario == idusuario)
-                              .Include(i => i.AsignacionGestor)
-                              .Include(i => i.AsignacionGestor1)
-                              .Include(i => i.Base)
-                              .Include(i => i.Base1)
-                              .Include(i => i.Bloqueocontacto)
-                              .Include(i => i.ClienteDeuda)
-                              .Include(i => i.ClienteDeuda1)
-                              .Include(i => i.ClienteDeudaHonorario)
-                              .Include(i => i.ClienteDeudaUsuario)
-                              .Include(i => i.ClienteDeudaUsuario1)
-                              .Include(i => i.DecisionEstado)
-                              .Include(i => i.Evento)
-                              .Include(i => i.Evento1)
-                              .Include(i => i.HonorarioAvvillas)
-                              .Include(i => i.LogDatoPersona)
-                              .Include(i => i.Rediferido)
-                              .Include(i => i.SubrepartoUsuario)
-                              .Include(i => i.SubrepartoUsuario1)
-                              .Include(i => i.SubrepartoUsuario2)
-                              .Include(i => i.Tarea)
-                              .Include(i => i.Tarea1)
-                              .Include(i => i.Tiempofuera)
-                              .Include(i => i.UsuarioCliente)
-                              .Include(i => i.UsuarioRol)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -19963,10 +19980,6 @@ namespace Reincarapp
         {
             var itemToDelete = Context.ZonaUbicacion
                               .Where(i => i.Id_Zona_Ubicacion == idzonaubicacion)
-                              .Include(i => i.DatoPersona)
-                              .Include(i => i.DatoPersona1)
-                              .Include(i => i.DatoPersona2)
-                              .Include(i => i.DatoPersona3)
                               .FirstOrDefault();
 
             if (itemToDelete == null)
@@ -20384,173 +20397,6 @@ namespace Reincarapp
             }
 
             OnAfterZzzTmpToDelTransitoDeleted(itemToDelete);
-
-            return itemToDelete;
-        }
-    
-        public async Task ExportAspnetusersToExcel(Query query = null, string fileName = null)
-        {
-            navigationManager.NavigateTo(query != null ? query.ToUrl($"export/reincardb/aspnetusers/excel(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')") : $"export/reincardb/aspnetusers/excel(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')", true);
-        }
-
-        public async Task ExportAspnetusersToCSV(Query query = null, string fileName = null)
-        {
-            navigationManager.NavigateTo(query != null ? query.ToUrl($"export/reincardb/aspnetusers/csv(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')") : $"export/reincardb/aspnetusers/csv(fileName='{(!string.IsNullOrEmpty(fileName) ? UrlEncoder.Default.Encode(fileName) : "Export")}')", true);
-        }
-
-        partial void OnAspnetusersRead(ref IQueryable<Reincarapp.Models.reincardb.Aspnetusers> items);
-
-        public async Task<IQueryable<Reincarapp.Models.reincardb.Aspnetusers>> GetAspnetusers(Query query = null)
-        {
-            var items = Context.Aspnetusers.AsQueryable();
-
-
-            if (query != null)
-            {
-                if (!string.IsNullOrEmpty(query.Expand))
-                {
-                    var propertiesToExpand = query.Expand.Split(',');
-                    foreach(var p in propertiesToExpand)
-                    {
-                        items = items.Include(p.Trim());
-                    }
-                }
-
-                ApplyQuery(ref items, query);
-            }
-
-            OnAspnetusersRead(ref items);
-
-            return await Task.FromResult(items);
-        }
-
-        partial void OnAspnetusersGet(Reincarapp.Models.reincardb.Aspnetusers item);
-        partial void OnGetAspnetusersById(ref IQueryable<Reincarapp.Models.reincardb.Aspnetusers> items);
-
-
-        public async Task<Reincarapp.Models.reincardb.Aspnetusers> GetAspnetusersById(string id)
-        {
-            var items = Context.Aspnetusers
-                              .AsNoTracking()
-                              .Where(i => i.Id == id);
-
- 
-            OnGetAspnetusersById(ref items);
-
-            var itemToReturn = items.FirstOrDefault();
-
-            OnAspnetusersGet(itemToReturn);
-
-            return await Task.FromResult(itemToReturn);
-        }
-
-        partial void OnAspnetusersCreated(Reincarapp.Models.reincardb.Aspnetusers item);
-        partial void OnAfterAspnetusersCreated(Reincarapp.Models.reincardb.Aspnetusers item);
-
-        public async Task<Reincarapp.Models.reincardb.Aspnetusers> CreateAspnetusers(Reincarapp.Models.reincardb.Aspnetusers aspnetusers)
-        {
-            OnAspnetusersCreated(aspnetusers);
-
-            var existingItem = Context.Aspnetusers
-                              .Where(i => i.Id == aspnetusers.Id)
-                              .FirstOrDefault();
-
-            if (existingItem != null)
-            {
-               throw new Exception("Item already available");
-            }            
-
-            try
-            {
-                Context.Aspnetusers.Add(aspnetusers);
-                Context.SaveChanges();
-            }
-            catch
-            {
-                Context.Entry(aspnetusers).State = EntityState.Detached;
-                throw;
-            }
-
-            OnAfterAspnetusersCreated(aspnetusers);
-
-            return aspnetusers;
-        }
-
-        public async Task<Reincarapp.Models.reincardb.Aspnetusers> CancelAspnetusersChanges(Reincarapp.Models.reincardb.Aspnetusers item)
-        {
-            var entityToCancel = Context.Entry(item);
-            if (entityToCancel.State == EntityState.Modified)
-            {
-              entityToCancel.CurrentValues.SetValues(entityToCancel.OriginalValues);
-              entityToCancel.State = EntityState.Unchanged;
-            }
-
-            return item;
-        }
-
-        partial void OnAspnetusersUpdated(Reincarapp.Models.reincardb.Aspnetusers item);
-        partial void OnAfterAspnetusersUpdated(Reincarapp.Models.reincardb.Aspnetusers item);
-
-        public async Task<Reincarapp.Models.reincardb.Aspnetusers> UpdateAspnetusers(string id, Reincarapp.Models.reincardb.Aspnetusers aspnetusers)
-        {
-            OnAspnetusersUpdated(aspnetusers);
-
-            var itemToUpdate = Context.Aspnetusers
-                              .Where(i => i.Id == aspnetusers.Id)
-                              .FirstOrDefault();
-
-            if (itemToUpdate == null)
-            {
-               throw new Exception("Item no longer available");
-            }
-                
-            var entryToUpdate = Context.Entry(itemToUpdate);
-            entryToUpdate.CurrentValues.SetValues(aspnetusers);
-            entryToUpdate.State = EntityState.Modified;
-
-            Context.SaveChanges();
-
-            OnAfterAspnetusersUpdated(aspnetusers);
-
-            return aspnetusers;
-        }
-
-        partial void OnAspnetusersDeleted(Reincarapp.Models.reincardb.Aspnetusers item);
-        partial void OnAfterAspnetusersDeleted(Reincarapp.Models.reincardb.Aspnetusers item);
-
-        public async Task<Reincarapp.Models.reincardb.Aspnetusers> DeleteAspnetusers(string id)
-        {
-            var itemToDelete = Context.Aspnetusers
-                              .Where(i => i.Id == id)
-                              .Include(i => i.Evento)
-                              .Include(i => i.Evento1)
-                              .Include(i => i.Tarea)
-                              .Include(i => i.Tarea1)
-                              .Include(i => i.Tarea2)
-                              .Include(i => i.UsuarioCliente)
-                              .FirstOrDefault();
-
-            if (itemToDelete == null)
-            {
-               throw new Exception("Item no longer available");
-            }
-
-            OnAspnetusersDeleted(itemToDelete);
-
-
-            Context.Aspnetusers.Remove(itemToDelete);
-
-            try
-            {
-                Context.SaveChanges();
-            }
-            catch
-            {
-                Context.Entry(itemToDelete).State = EntityState.Unchanged;
-                throw;
-            }
-
-            OnAfterAspnetusersDeleted(itemToDelete);
 
             return itemToDelete;
         }

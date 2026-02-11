@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using Reincarapp.Data;
 using Reincarapp.Models.reincardb;
@@ -11,15 +10,15 @@ namespace Reincarapp.Services
 {
     public class DatoPersonaSyncService
     {
-        
-        private readonly reincardbContext2 _reincardbContext2;
-        private readonly reincardbContext _reincardbContext;
+        private readonly IDbContextFactory<reincardbContext2> _contextFactory2;
+        private readonly IDbContextFactory<reincardbContext> _contextFactory;
 
-        public DatoPersonaSyncService(reincardbContext2 reincardbContext2, reincardbContext reincardbContext)
+        public DatoPersonaSyncService(
+            IDbContextFactory<reincardbContext2> contextFactory2, 
+            IDbContextFactory<reincardbContext> contextFactory)
         {
-            
-            _reincardbContext2 = reincardbContext2;
-            _reincardbContext = reincardbContext;
+            _contextFactory2 = contextFactory2;
+            _contextFactory = contextFactory;
         }
 
         /// <summary>
@@ -33,67 +32,55 @@ namespace Reincarapp.Services
             if (string.IsNullOrEmpty(numeroDocumento))
                 throw new ArgumentNullException(nameof(numeroDocumento));
 
+            // Usar contextos independientes para evitar conflictos de concurrencia
+            using var contextHistorico = await _contextFactory2.CreateDbContextAsync();
+            using var contextPrincipal = await _contextFactory.CreateDbContextAsync();
+
             // Obtener persona del histórico con sus datos
-            var personaHistorica = await _reincardbContext2.Persona
+            var personaHistorica = await contextHistorico.Persona
                 .Include(x => x.DatoPersona)
                 .Where(x => x.Numero_Documento == numeroDocumento)
                 .FirstOrDefaultAsync();
 
             if (personaHistorica == null || personaHistorica.DatoPersona == null || !personaHistorica.DatoPersona.Any())
             {
-                return 0; // No hay datos para sincronizar
+                return 0;
             }
 
             int registrosAfectados = 0;
-
-            // Lista temporal para acumular los datos a sincronizar
             List<DatoPersona> datosTemporales = new List<DatoPersona>();
 
-         
-
-                // Recorrer cada dato persona del histórico
-                foreach (var datoHistorico in personaHistorica.DatoPersona)
-                {
-                    // Verificar si ya existe para evitar duplicados
-                    bool existe = await _reincardbContext.Persona
-                                                         .Include(x => x.DatoPersona)
-                                                         .Where(x => x.Numero_Documento == numeroDocumento && x.DatoPersona.Any(dp => dp.Id_Tipo_Dato_Persona == datoHistorico.Id_Tipo_Dato_Persona && dp.Dato.ToLower() == datoHistorico.Dato.ToLower()))
-                                                         .AnyAsync();
+            // Recorrer cada dato persona del histórico
+            foreach (var datoHistorico in personaHistorica.DatoPersona)
+            {
+                // Verificar si ya existe para evitar duplicados
+                bool existe = await contextPrincipal.Persona
+                    .Include(x => x.DatoPersona)
+                    .Where(x => x.Numero_Documento == numeroDocumento && 
+                           x.DatoPersona.Any(dp => dp.Id_Tipo_Dato_Persona == datoHistorico.Id_Tipo_Dato_Persona && 
+                                                  dp.Dato.ToLower() == datoHistorico.Dato.ToLower()))
+                    .AnyAsync();
 
                 if (!existe)
-                    {
-                        // Crear nuevo registro en la BD principal
-                        var nuevoDato = new DatoPersona
-                        {
-                            Id_Persona = idPersona,
-                            Id_Tipo_Dato_Persona = datoHistorico.Id_Tipo_Dato_Persona,
-                            Dato = datoHistorico.Dato
-                          
-
-                        };
-
-                        datosTemporales.Add(nuevoDato);
-                        
-                    }
-                }
-
-                if (datosTemporales.Count > 0)
                 {
-                    await _reincardbContext.DatoPersona.AddRangeAsync(datosTemporales);
-                    // Guardar todos los cambios en una sola transacción
-                    registrosAfectados = await _reincardbContext.SaveChangesAsync();
+                    var nuevoDato = new DatoPersona
+                    {
+                        Id_Persona = idPersona,
+                        Id_Tipo_Dato_Persona = datoHistorico.Id_Tipo_Dato_Persona,
+                        Dato = datoHistorico.Dato
+                    };
+
+                    datosTemporales.Add(nuevoDato);
+                }
             }
-                
 
-                return registrosAfectados;
+            if (datosTemporales.Count > 0)
+            {
+                await contextPrincipal.DatoPersona.AddRangeAsync(datosTemporales);
+                registrosAfectados = await contextPrincipal.SaveChangesAsync();
+            }
 
-
-
-
-
-           
-
-           
+            return registrosAfectados;
         }
     }
 }

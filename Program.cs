@@ -1,13 +1,14 @@
+using MatBlazor;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.ModelBuilder;
 using Radzen;
 using Reincarapp.Components;
-using Microsoft.EntityFrameworkCore;
 using Reincarapp.Data;
-using Microsoft.AspNetCore.Identity;
 using Reincarapp.Models;
-using Microsoft.AspNetCore.OData;
-using Microsoft.OData.ModelBuilder;
-using Microsoft.AspNetCore.Components.Authorization;
-using MatBlazor;
+using Reincarapp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -23,15 +24,21 @@ builder.Services.AddRadzenCookieThemeService(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<Reincarapp.reincardbService>();
 builder.Services.AddScoped<Reincarapp.TodoItemService>();
-builder.Services.AddScoped<Reincarapp.Services.DatoPersonaSyncService>();
-builder.Services.AddDbContext<Reincarapp.Data.reincardbContext>(options =>
+builder.Services.AddScoped<DatoPersonaSyncService>();
+builder.Services.AddScoped<ILogAppService, LogAppService>();
+// DbContextFactory para operaciones concurrentes (reemplaza AddDbContext)
+builder.Services.AddDbContextFactory<Reincarapp.Data.reincardbContext>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("reincardbConnection"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("reincardbConnection")));
-});
-builder.Services.AddDbContext<Reincarapp.Data.reincardbContext2>(options =>
+}, ServiceLifetime.Scoped);
+// DbContextFactory para reincardbContext2
+builder.Services.AddDbContextFactory<Reincarapp.Data.reincardbContext2>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("reincardbConnection2"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("reincardbConnection2")));
-});
+}, ServiceLifetime.Scoped);
+// Registrar DbContext como scoped usando el factory
+builder.Services.AddScoped<Reincarapp.Data.reincardbContext>(provider => provider.GetRequiredService<IDbContextFactory<Reincarapp.Data.reincardbContext>>().CreateDbContext());
+builder.Services.AddScoped<Reincarapp.Data.reincardbContext2>(provider => provider.GetRequiredService<IDbContextFactory<Reincarapp.Data.reincardbContext2>>().CreateDbContext());
 builder.Services.AddHttpClient("Reincarapp").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false }).AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddAuthentication();
@@ -53,6 +60,10 @@ builder.Services.AddControllers().AddOData(o =>
     o.AddRouteComponents("odata/Identity", oDataBuilder.GetEdmModel()).Count().Filter().OrderBy().Expand().Select().SetMaxTop(null).TimeZone = TimeZoneInfo.Utc;
 });
 builder.Services.AddScoped<AuthenticationStateProvider, Reincarapp.ApplicationAuthenticationStateProvider>();
+builder.Services.AddDbContext<Reincarapp.Data.reincardbContext>(options =>
+{
+    options.UseMySql(builder.Configuration.GetConnectionString("reincardbConnection"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("reincardbConnection")));
+});
 var app = builder.Build();
 var forwardingOptions = new ForwardedHeadersOptions()
 {

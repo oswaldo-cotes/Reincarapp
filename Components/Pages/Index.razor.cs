@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -8,10 +9,14 @@ using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using NPOI.OpenXmlFormats.Spreadsheet;
+using NPOI.SS.Formula.Functions;
 using Radzen;
 using Radzen.Blazor;
+using Reincarapp.Components.Pages.Transaccional.Gestionar;
+using Reincarapp.Components.Pages.Transaccional.Gestionar.ClienteDeuda;
 using Reincarapp.Models.MyModels;
 using Reincarapp.Models.reincardb;
+using System.Buffers;
 using System.Net.Http;
 
 namespace Reincarapp.Components.Pages
@@ -143,8 +148,49 @@ namespace Reincarapp.Components.Pages
             //     args.Data.Text = data.Text;
             // }
 
+            var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
 
-            var res = await DialogService.OpenAsync<Pages.Transaccional.Gestionar.Evento.AddEvento>("Add Evento", new Dictionary<string, object> { { "ClienteDeudaId", args.Data.IdClienteDeuda }, { "IdNegocio", "" }, { "IdTarea", args.Data.Id } }, new DialogOptions() { Draggable = true, Width = "700px", Height = "800px" });
+            var query = ctx.ClienteDeudaDato
+                   .AsNoTracking()
+                   .Include(x => x.Cliente)
+                   .Include(x => x.ClienteDeuda.Persona)
+                   .Include(x => x.ClienteDeuda.EstadoClienteDeuda)
+                   .Include(x => x.ClienteDeuda.Usuario)
+                   .Include(x => x.ClienteDeuda.Usuario1)
+                   .Include(x => x.ClienteDeuda.ResultadoEvento1)
+                   .Include(x => x.ClienteDeuda.ResultadoEvento)
+                   .Include(x => x.ClienteDeuda.ClienteDeudaCons)
+                       .ThenInclude(x => x.Evento)
+                       .ThenInclude(x => x.ResultadoEvento)
+                   .Include(x => x.ClienteDeuda.ClienteDeudaCons)
+                       .ThenInclude(x => x.Evento1)
+                       .ThenInclude(Evento => Evento.ResultadoEvento)
+                   .Where(x => x.Id_Cliente_Deuda == args.Data.IdClienteDeuda &&
+                          x.Fecha_Final == null &&
+                          x.Fecha_Inicial >= startDate &&
+                          x.Fecha_Inicial <= endDate);
+
+          
+
+            var clienteDeudaList = await query.ToListAsync();
+
+            var clienteDeuda = clienteDeudaList
+                .Select(x => x.ClienteDeuda)
+                .OrderBy(x => x.Persona?.Numero_Documento)
+                .ThenBy(x => x.Persona?.Nombre_Persona)
+                .ToList();
+
+
+
+            var res =  await DialogService.OpenAsync<GestionarDeuda>(
+                 "Gestionando...",
+                 new Dictionary<string, object> { { "registro", clienteDeuda.FirstOrDefault() } },
+                 new DialogOptions { Width = "100%", Height = "100%", Draggable = false, Resizable = false }
+             );
+
+
+            //var res = await DialogService.OpenAsync<Pages.Transaccional.Gestionar.Evento.AddEvento>("Add Evento", new Dictionary<string, object> { { "ClienteDeudaId", args.Data.IdClienteDeuda }, { "IdNegocio", "" }, { "IdTarea", args.Data.Id } }, new DialogOptions() { Draggable = true, Width = "700px", Height = "800px" });
 
             if (res != null)
             {
@@ -358,15 +404,21 @@ namespace Reincarapp.Components.Pages
                         clientes = securityService.usuario.UsuarioCliente.Select(x => x.Cliente).ToList();
 
                     }
-
-
-                    var tareasPorEjec = await ctx.Tarea.Include(x => x.ClienteDeuda).ThenInclude(x => x.Persona).Where(x => x.Fecha_Ejecucion_Tarea == null).ToListAsync();
+                    var tareasPorEjec = await ctx.Tarea
+                                                 .Include(x => x.ClienteDeuda)
+                                                 .ThenInclude(x => x.Persona)
+                                                 .Include(x => x.Aspnetusers)
+                                                 .Include(x=>x.Aspnetusers1)
+                                                 .Include(x=>x.Aspnetusers2)
+                                                 .Where(x=> x.Fecha_Ejecucion_Tarea == null)
+                                                 .AsNoTracking()
+                                                 .ToListAsync();
 
                     tareasPorEjec.ForEach(x =>
                     {
 
 
-                        appointments.Add(new Appointment() { Start = x.Fecha_Realizacion_Tarea, End = x.Fecha_Realizacion_Tarea.AddMinutes(15), Text = x.Texto_Tarea, Id = x.Id_Tarea, IdClienteDeuda = x.Id_Cliente_Deuda ?? 0 });
+                        appointments.Add(new Appointment() { Start = x.Fecha_Realizacion_Tarea, End = x.Fecha_Realizacion_Tarea.AddMinutes(15), Text = x.Texto_Tarea + ". Asignado a : " + x.Aspnetusers?.UserName, Id = x.Id_Tarea, IdClienteDeuda = x.Id_Cliente_Deuda ?? 0 });
 
                     });
 

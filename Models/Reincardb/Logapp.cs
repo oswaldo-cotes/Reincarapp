@@ -20,5 +20,8 @@ namespace Reincarapp.Models.reincardb
         public string Texto { get; set; }
 
         public DateTime? FechaCreacion { get; set; }
+
+        [MaxLength(95)]
+        public string CreatedBy { get; set; }
     }
 }

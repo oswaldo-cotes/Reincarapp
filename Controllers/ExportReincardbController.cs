@@ -89,6 +89,20 @@ namespace Reincarapp.Controllers
             return ToExcel(ApplyQuery(await service.GetAsignacionGestor(), Request.Query, false), fileName);
         }
 
+        [HttpGet("/export/reincardb/aspnetusers/csv")]
+        [HttpGet("/export/reincardb/aspnetusers/csv(fileName='{fileName}')")]
+        public async Task<FileStreamResult> ExportAspnetusersToCSV(string fileName = null)
+        {
+            return ToCSV(ApplyQuery(await service.GetAspnetusers(), Request.Query, false), fileName);
+        }
+
+        [HttpGet("/export/reincardb/aspnetusers/excel")]
+        [HttpGet("/export/reincardb/aspnetusers/excel(fileName='{fileName}')")]
+        public async Task<FileStreamResult> ExportAspnetusersToExcel(string fileName = null)
+        {
+            return ToExcel(ApplyQuery(await service.GetAspnetusers(), Request.Query, false), fileName);
+        }
+
         [HttpGet("/export/reincardb/avvillas/csv")]
         [HttpGet("/export/reincardb/avvillas/csv(fileName='{fileName}')")]
         public async Task<FileStreamResult> ExportAvvillasToCSV(string fileName = null)
@@ -2103,20 +2117,6 @@ namespace Reincarapp.Controllers
         public async Task<FileStreamResult> ExportZzzTmpToDelTransitoToExcel(string fileName = null)
         {
             return ToExcel(ApplyQuery(await service.GetZzzTmpToDelTransito(), Request.Query, false), fileName);
-        }
-
-        [HttpGet("/export/reincardb/aspnetusers/csv")]
-        [HttpGet("/export/reincardb/aspnetusers/csv(fileName='{fileName}')")]
-        public async Task<FileStreamResult> ExportAspnetusersToCSV(string fileName = null)
-        {
-            return ToCSV(ApplyQuery(await service.GetAspnetusers(), Request.Query, false), fileName);
-        }
-
-        [HttpGet("/export/reincardb/aspnetusers/excel")]
-        [HttpGet("/export/reincardb/aspnetusers/excel(fileName='{fileName}')")]
-        public async Task<FileStreamResult> ExportAspnetusersToExcel(string fileName = null)
-        {
-            return ToExcel(ApplyQuery(await service.GetAspnetusers(), Request.Query, false), fileName);
         }
     }
 }
