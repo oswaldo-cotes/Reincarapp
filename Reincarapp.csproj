@@ -19,4 +19,7 @@
     <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="9.*-*" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.*-*" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Components\Pages\Configuracion\Seguridad\UsuarioCliente2\" />
+  </ItemGroup>
 </Project>

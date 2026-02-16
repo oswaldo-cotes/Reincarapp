@@ -1,0 +1,194 @@
+@page "/add-resultado-evento"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+@attribute [Authorize(Roles="Administrador")]
+
+@inject reincardbService reincardbService
+
+<PageTitle>Add ResultadoEvento</PageTitle>
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save ResultadoEvento</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.ResultadoEvento" Data="@resultadoEvento" Visible="@(resultadoEvento != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+             <RadzenFormField Text="Cliente" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@clientesForidCliente" TextProperty="Nombre_Cliente" ValueProperty="Id_Cliente" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@resultadoEvento.id_cliente" Name="id_cliente"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Nombre Resultado Evento" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@resultadoEvento.Nombre_Resultado_Evento" Name="Nombre_Resultado_Evento" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Inactiva Resultado?" Component="InactivarResultadoEvento" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.InactivarResultadoEvento" Name="InactivarResultadoEvento" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Inactiva Tipo Comunicacion" Component="Inactiva_Tipo_Comunicacion" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Inactiva_Tipo_Comunicacion" Name="Inactiva_Tipo_Comunicacion" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Crea Tarea Automatica" Component="Crea_Tarea_Automatica" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Crea_Tarea_Automatica" Name="Crea_Tarea_Automatica" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenFormField Text="Valor Exito" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@resultadoEvento.Valor_Exito" Name="Valor_Exito" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Id Negocio Cliente" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@resultadoEvento.Id_Negocio_Cliente" Name="Id_Negocio_Cliente" />
+              </ChildContent>
+            </RadzenFormField>
+             <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Es Contacto" Component="Es_Contacto" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Es_Contacto" Name="Es_Contacto" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Conexion Informe Diario" Component="Conexion_Informe_Diario" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Conexion_Informe_Diario" Name="Conexion_Informe_Diario" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Contacto Informe Diario" Component="Contacto_Informe_Diario" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Contacto_Informe_Diario" Name="Contacto_Informe_Diario" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Contacto Directo Informe Diario" Component="Contacto_Directo_Informe_Diario" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Contacto_Directo_Informe_Diario" Name="Contacto_Directo_Informe_Diario" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Promesa Levantada" Component="Promesa_Levantada" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Promesa_Levantada" Name="Promesa_Levantada" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Promesa Efectiva" Component="Promesa_Efectiva" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Promesa_Efectiva" Name="Promesa_Efectiva" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenFormField Text="Codificacion Tipificacion" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@resultadoEvento.Codificacion_Tipificacion" Name="Codificacion_Tipificacion" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Envio Actualizador" Component="Envio_Actualizador" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.Envio_Actualizador" Name="Envio_Actualizador" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Es Recaudo" Component="Es_Recaudo" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.es_recaudo" Name="Es_Recaudo" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="Es Compromiso" Component="Es_Compromiso" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.es_compromiso" Name="Es_Compromiso" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow style="margin-bottom: 1rem">
+                <RadzenColumn SizeMD="3">
+                    <RadzenLabel Text="No Enviar En Informe" Component="No_Enviar_En_Informe" style="width: 100%" />
+                </RadzenColumn>
+                <RadzenColumn SizeMD="9">
+                    <RadzenCheckBox @bind-Value="@resultadoEvento.No_Enviar_En_Informe" Name="No_Enviar_En_Informe" />
+                </RadzenColumn>
+            </RadzenRow>
+           
+          
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        resultadoEvento = new Reincarapp.Models.reincardb.ResultadoEvento();
+
+        clientesForidCliente = await reincardbService.GetCliente();
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.ResultadoEvento resultadoEvento;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Cliente> clientesForidCliente;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            await reincardbService.CreateResultadoEvento(resultadoEvento);
+            DialogService.Close(resultadoEvento);
+        }
+        catch (Exception ex)
+        {
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        DialogService.Close(null);
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+}

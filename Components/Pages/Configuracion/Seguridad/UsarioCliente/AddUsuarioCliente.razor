@@ -1,0 +1,82 @@
+@page "/add-usuario-cliente"
+@attribute [Authorize(Roles="Administrador")]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+
+<PageTitle>Add UsuarioCliente</PageTitle>
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save UsuarioCliente</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.UsuarioCliente" Data="@usuarioCliente" Visible="@(usuarioCliente != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Cliente" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@clientesForIdCliente" TextProperty="Nombre_Cliente" ValueProperty="Id_Cliente" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@usuarioCliente.Id_Cliente" Name="Id_Cliente"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Usuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuario" TextProperty="Nombre_Usuario" ValueProperty="Id_Usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@usuarioCliente.Id_Usuario" Name="Id_Usuario"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+
+    [Parameter]
+    public long Id_Usuario { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarioCliente = new Reincarapp.Models.reincardb.UsuarioCliente() { Id_Usuario = this.Id_Usuario};
+
+        clientesForIdCliente = await reincardbService.GetCliente();
+
+        usuariosForIdUsuario = await reincardbService.GetUsuario();
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.UsuarioCliente usuarioCliente;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Cliente> clientesForIdCliente;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuariosForIdUsuario;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            await reincardbService.CreateUsuarioCliente(usuarioCliente);
+            DialogService.Close(usuarioCliente);
+        }
+        catch (Exception ex)
+        {
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        DialogService.Close(null);
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+}

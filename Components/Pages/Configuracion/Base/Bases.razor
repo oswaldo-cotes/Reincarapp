@@ -1,0 +1,93 @@
+@page "/bases"
+
+@attribute [Authorize]
+
+<PageTitle>Bases</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="Bases" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px" ExpandMode=DataGridExpandMode.Single  AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@bases" TItem="Reincarapp.Models.reincardb.Base" RowDoubleClick="@EditRow" RowExpand="@GetChildData">
+            <Columns>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="Id" Title="Id">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="Cliente.Nombre_Cliente" Title="Cliente">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="Tipobase.Nombre" Title="Tipobase">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="Usuario.Cargo" Title="Usuario">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="Usuario1.Cargo" Title="Usuario1">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="Nombre" Title="Nombre">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="FechaCre" Title="Fecha Cre">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="FechaAct" Title="Fecha Act">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Property="NombreArchivo" Title="Nombre Archivo">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Base" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="_base">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                            Shade="Shade.Lighter" Variant="Variant.Flat"
+                            Click=@(args => GridDeleteButtonClick(args, _base)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <Template Context="_base">
+
+                    <RadzenStack Class="rz-my-8">
+                        <RadzenRow Gap="0" AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenText Visible="@(_baseChild != null)" Text="Basecampos" TextStyle="TextStyle.H4" TagName="TagName.H2" style="margin: 0" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                                    <RadzenButton Visible="@(_baseChild != null)" Icon="add_circle_outline" Text="Add" Click=@(args => BasecamposAddButtonClick(args,_baseChild)) />
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenDataGrid ColumnWidth="200px" Visible="@(_baseChild != null)" @ref=BasecamposDataGrid AllowFiltering="true" FilterMode="Radzen.FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+                          Data="@_baseChild?.Basecampo" TItem="Reincarapp.Models.reincardb.Basecampo"  RowDoubleClick="@(args => BasecamposRowSelect(args, _baseChild))">
+                          <Columns>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Basecampo" Property="Id" Title="Id">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Basecampo" Property="Nombre" Title="Nombre">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Basecampo" Property="Campoclave.Nombre" Title="CampoClave">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Basecampo" Property="Base.NombreArchivo" Title="Base">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Basecampo" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                                <Template Context="basecampoChild">
+
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium" Shade="Shade.Lighter" Variant="Variant.Flat"
+                                        Click=@(args => BasecamposDeleteButtonClick(args, basecampoChild)) @onclick:stopPropagation="true" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                          </Columns>
+                        </RadzenDataGrid>
+                    </RadzenStack>
+            </Template>
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>

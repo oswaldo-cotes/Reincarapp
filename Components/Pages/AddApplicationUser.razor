@@ -7,6 +7,16 @@
             <RadzenAlert Title="Cannot create user" Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
 
             <RadzenStack style="margin-bottom: 1rem;">
+
+                <RadzenFormField Text="UserName" Variant="Variant.Text">
+                    <ChildContent>
+                        <RadzenTextBox style="width: 100%" @bind-Value="@(user.UserName)" Name="UserName" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="UserName" Text="UserName is required" />
+                    </Helper>
+                </RadzenFormField>
+
                 <RadzenFormField Text="Email" Variant="Variant.Text">
                     <ChildContent>
                         <RadzenTextBox style="width: 100%" @bind-Value="@(user.Email)" Name="Email" />

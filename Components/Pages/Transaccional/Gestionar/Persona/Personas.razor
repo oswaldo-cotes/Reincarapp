@@ -1,0 +1,124 @@
+@page "/personas"
+
+@attribute [Authorize]
+
+<PageTitle>Personas</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="Personas" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px" ExpandMode=DataGridExpandMode.Single  AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@(personas)" TItem="Reincarapp.Models.reincardb.Persona" RowExpand="@GetChildData">
+            <Columns>
+            @*     <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Persona" Property="Id_Persona" Title="Id Persona">
+                </RadzenDataGridColumn> *@
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Persona" Property="TipoDocumento.Tipo_Documento" Title="Tipo Documento">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Persona" Property="Numero_Documento" Title="Numero Documento">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Persona" Property="Nombre_Persona" Title="Nombre Persona">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Persona" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="persona">
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <Template Context="persona">
+
+                    <RadzenStack Class="rz-my-8">
+                        <RadzenRow Gap="0" AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenText Visible="@(personaChild != null)" Text="ClienteDeuda" TextStyle="TextStyle.H4" TagName="TagName.H2" style="margin: 0" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenDataGrid ColumnWidth="200px" Visible="@(personaChild != null)" @ref=ClienteDeudaDataGrid AllowFiltering="true" FilterMode="Radzen.FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+                          Data="@personaChild?.ClienteDeuda" TItem="Reincarapp.Models.reincardb.ClienteDeuda" >
+                          <Columns>
+                  @*           <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Id_Cliente_Deuda" Title="Id Cliente Deuda">
+                            </RadzenDataGridColumn> *@
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Nombre_Cliente_Deuda" Title="Nombre Cliente Deuda">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="EstadoClienteDeuda.Nombre_Estado" Title="Estado Cliente Deudum">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Cliente.Nombre_Cliente" Title="Cliente">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Persona.Nombre_Persona" Title="Persona">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Monto" Title="Monto">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Fecha_Inicio_Deuda" Title="Fecha Inicio Deuda">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Fecha_Cierre_Deuda" Title="Fecha Cierre Deuda">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="Fecha_Creacion" Title="Fecha Creacion">
+                            </RadzenDataGridColumn>
+                    
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="ResultadoEvento1.Nombre_Resultado_Evento" Title="Resultado Evento1">
+                            </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Property="ResultadoEvento.Nombre_Resultado_Evento" Title="Resultado Evento">
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.ClienteDeuda" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                                <Template Context="clienteDeudumChild">
+                                </Template>
+                            </RadzenDataGridColumn>
+                          </Columns>
+                        </RadzenDataGrid>
+                    </RadzenStack>
+                    <RadzenStack Class="rz-my-8">
+                        <RadzenRow Gap="0" AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenText Visible="@(personaChild != null)" Text="DatoPersonas" TextStyle="TextStyle.H4" TagName="TagName.H2" style="margin: 0" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenDataGrid ColumnWidth="200px" Visible="@(personaChild != null)" @ref=DatoPersonasDataGrid AllowFiltering="true" FilterMode="Radzen.FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+                          Data="@personaChild?.DatoPersona" TItem="Reincarapp.Models.reincardb.DatoPersona" >
+                          <Columns>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Id_Dato_Persona" Title="Id Dato Persona">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="TipoDatoPersona.Nombre_Tipo_Dato_Persona" Title="Tipo Dato Persona">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Persona.Nombre_Persona" Title="Persona">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Departamento.Nombre_Departamento" Title="Departamento">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Municipio.Nombre_Municipio" Title="Municipio">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Dato" Title="Dato">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Property="Dato_Activo" Title="Dato Activo">
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.DatoPersona" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                                <Template Context="datoPersonaChild">
+                                </Template>
+                            </RadzenDataGridColumn>
+                          </Columns>
+                        </RadzenDataGrid>
+                    </RadzenStack>
+            </Template>
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>

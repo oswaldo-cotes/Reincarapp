@@ -1,0 +1,371 @@
+﻿@page "/nuevosinformes"
+<h3>Nuevos Informes</h3>
+
+@using MatBlazor;
+@using System.IO;
+@using System.Data;
+@using Microsoft.EntityFrameworkCore
+@using MySql.Data.MySqlClient;
+
+@inject TodoItemService todoItemService
+
+@using System.Net.Http
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject IJSRuntime JSRuntime
+@using Microsoft.Extensions.Configuration;
+@using Reincarapp.Models.reincardb
+@inject Reincarapp.Data.reincardbContext ctx
+@inject SecurityService securityService
+@inject NotificationService NotificationService
+
+
+
+
+
+<RadzenRow >
+
+    <RadzenColumn Size="12">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Gap="1rem">
+            <RadzenDatePicker @bind-Value="@fIni" Placeholder="Fecha Inicio" DateFormat="dd/MM/yyyy"  />
+            <RadzenDatePicker @bind-Value="@fFin" Placeholder="Fecha Fin" DateFormat="dd/MM/yyyy"  />
+            <RadzenDropDownDataGrid @bind-Value="selectedCliente"
+                                    Data="@lstCli"
+                                    TextProperty="Nombre_Cliente"
+                                    ValueProperty="Id_Cliente"
+                                    Placeholder="Seleccione un cliente..."
+                                    Style="width: 100%;"
+                                    AllowClear="true"
+                                    AllowFiltering="true"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
+            </RadzenDropDownDataGrid>
+
+
+            </RadzenStack>
+       
+        
+    </RadzenColumn>
+
+   
+</RadzenRow>
+
+@if (isLoading)
+{
+    <MatProgressBar Indeterminate="true" Closed="@(!isLoading)"></MatProgressBar>
+}
+
+
+<RadzenRow>
+    <RadzenColumn Size="4">
+        <RadzenButton Variant="Variant.Outlined" IsBusy="@isLoading" Click="@(async e => await Export("SP_HORA"))">Prod. Por Hora</RadzenButton>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenButton Variant="Variant.Outlined" IsBusy="@isLoading" Click="@(async e => await Export("SP_GET_GESTIONES"))">Reporte De Gestiones</RadzenButton>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenButton Variant="Variant.Outlined" IsBusy="@isLoading" Click="@(async e => await Export("SP_GET_CONTACTABILIDAD"))">Contactabilidad</RadzenButton>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenButton Variant="Variant.Outlined" IsBusy="@isLoading" Click="@(async e => await Export("SP_GET_MEJOR_GESTION"))">Mejor Gestion</RadzenButton>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenButton Variant="Variant.Outlined" IsBusy="@isLoading" Click="@(async e => await Export("SpGetDatoPersonaCliente"))">Datos Personales</RadzenButton>
+    </RadzenColumn>
+</RadzenRow>
+
+
+
+
+ 
+       
+
+
+
+
+
+
+    @response
+
+    <MatSnackbar @bind-IsOpen="@snackBarIsOpen">
+        <MatSnackbarContent>@msg</MatSnackbarContent>
+        <MatSnackbarActions>
+            <MatButton OnClick="@(e => { snackBarIsOpen = false; })">Aceptar</MatButton>
+        </MatSnackbarActions>
+    </MatSnackbar>
+
+
+@code {
+    long? selectedCliente;
+    ClaimsPrincipal user = new ClaimsPrincipal();
+    List<Cliente> lstCli = new List<Cliente>();
+
+    string userIdG = "";
+    string rol = "";
+
+    public DateTime? fIni { get; set; } = DateTime.Now;
+    public DateTime? fFin { get; set; } = DateTime.Now;
+
+    Dictionary<string, string> sps = new Dictionary<string, string>()
+ {
+            {"CVC1", "SET SESSION group_concat_max_len = 10000; select * from VW_INFORME_GESTION_CV_C1 where fecha_gestion between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"VR2", "select * from VW_INFORME_GESTION_VR2 where fecha_llamada between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"DIARIO", "select * from VW_INFORME_DIARIO where fecha_gestion between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"HORA","select * from vw_informe_hora where id_cliente = 14 and  fecha_creacion_evento between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"BASE VIGENTE","select c.identificacion,c.NOMBRE_PLASTICO,c.Fecha_Inicial from credivalores c where c.fecha_final is null" },
+            {"TRANSITO","Call SP_GET_INFORME_CONS_TRANSITO()" },
+            {"COOMULTRASAN","select * from vw_informe_coomultrasan where fecha_gestion between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+        };
+
+    bool snackBarIsOpen = false;
+    string msg = "";
+    string clientes;
+    List<int> TagIds;
+
+    List<string> rolesCarga = new List<string>() { "1", "4", "6", "12", "13" };
+
+    List<string> spssamep = new List<string>() { "SP_GET_CONTACTABILIDAD", "SP_HORA", "SP_GET_MEJOR_GESTION" };
+
+    bool isLoading = false;
+    bool visible = false;
+
+    string idCliente = "";
+
+    string response = "";
+
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        try
+        {
+            if (securityService.IsAdministrator)
+            {
+                // Administrator sees all usuarios and clientes
+                // usuarios = await ctx.Usuarios
+                //     .Include(x => x.UsuarioClientes)
+                //     .ToListAsync();
+
+                lstCli = await ctx.Cliente
+                    .Include(x => x.UsuarioCliente)
+                    .ToListAsync();
+            }
+            else
+            {
+                // Non-administrator users see filtered data based on their relationships
+                // usuarios = await ctx.Usuarios
+                //     .Include(x => x.UsuarioClientes)
+                //     .Where(x => x.UsuarioClientes.Any(uc =>
+                //         securityService.usuario.UsuarioClientes.Any(suc => suc.Id_Usuario == x.Id_Usuario)))
+                //     .ToListAsync();
+
+                lstCli = securityService.usuario.UsuarioCliente.Select(x => x.Cliente).ToList();
+
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnAfterRenderAsync: {ex.Message}");
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error",
+                Detail = "Error al cargar datos iniciales",
+                Duration = 4000
+            });
+        }
+               
+
+
+         
+        
+
+
+    }
+
+    public async void SelectionChangedEvent(string value)
+    {
+        idCliente = value;
+    }
+
+
+    async Task Export(string strView)
+    {
+        try
+        {
+            @*var q = from r in rediferidos.AsEnumerable()
+                select r;*@
+
+            //var sp = sps.Where(x => x.Key == strView).FirstOrDefault();
+
+            DataTable dt = new DataTable();
+
+            idCliente = selectedCliente?.ToString();
+
+            isLoading = true;
+            await InvokeAsync(() => { this.StateHasChanged(); });
+            //await Task.Delay(2000);
+
+            // Realizar la ejecucion
+            //dt = await todoItemService.Q2Dt("CALL " + strView + ()     sp.Value.Replace("[fini]", fIni.Value.ToString("yyyy-MM-dd")).Replace("[ffin]", fFin.Value.ToString("yyyy-MM-dd")));
+
+
+            List<object> _params = new List<object>();
+            string fileName = "";
+            bool oneExec = true;
+
+            switch (strView)
+            {
+                case "SP_HORA":
+                    _params.Add(idCliente);
+                    _params.Add(fIni.Value.ToString("yyyy-MM-dd"));
+                    _params.Add(fFin.Value.ToString("yyyy-MM-dd"));
+                    fileName = "reporteporhora";
+
+                    break;
+                case "SP_GET_CONTACTABILIDAD":
+                    _params.Add(idCliente);
+                    _params.Add(fIni.Value.ToString("yyyy-MM-dd"));
+                    _params.Add(fFin.Value.ToString("yyyy-MM-dd"));
+                    fileName = "reportecontactabilidad";
+
+                    break;
+                case "SP_GET_MEJOR_GESTION":
+                    oneExec = false;
+                    dt = await Task.Run(() => GetXls(strView + "_P", new object[] { idCliente, fIni.Value.ToString("yyyy-MM-dd"), fFin.Value.ToString("yyyy-MM-dd") }));
+
+
+                    /*_params.Add(idCliente);
+                    _params.Add(fIni.Value.ToString("yyyy-MM-dd"));
+                    _params.Add(fFin.Value.ToString("yyyy-MM-dd"));
+                    fileName = "reportemejorgestion";*/
+
+            break;
+
+                case "SP_GET_GESTIONES":
+                    /*_params.Add(idCliente);
+                    _params.Add(fIni.Value.ToString("yyyy-MM-dd"));
+                    _params.Add(fFin.Value.ToString("yyyy-MM-dd"));
+                    _params.Add(DBNull.Value);
+                    _params.Add(DBNull.Value);
+                    _params.Add(DBNull.Value);
+                    _params.Add(DBNull.Value);*/
+                                                            oneExec = false;
+                    dt = await Task.Run(() => GetXls(strView + "_P", new object[] { idCliente, fIni.Value.ToString("yyyy-MM-dd"), fFin.Value.ToString("yyyy-MM-dd"), DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value }));
+                    break;
+                case "SpGetDatoPersonaCliente":
+
+                    oneExec = false;
+                    dt = await Task.Run(() => GetXls(strView, new object[] { idCliente }));
+
+                    //fileName = "reportedegestiones";
+                    break;
+            }
+
+            if (oneExec)
+            {
+
+                dt = await todoItemService.GetDataSPDt(strView, _params.ToArray());
+                if (dt.Rows.Count > 0)
+                {
+                    //var dt = HelperFuncs.ToDataTable<Rediferido>(rediferidos);
+                    var ms = await todoItemService.WriteExcelWithNPOI("xlsx", dt);
+                    ms.Position = 0;
+                    using var streamRef = new DotNetStreamReference(stream: ms);
+                    await JSRuntime.InvokeVoidAsync("downloadFileFromStream", strView + ".xlsx", streamRef);
+                    //await JSRuntime.InvokeAsync<object>("saveAsFile", spName + ".xlsx", ms.ToArray()).AsTask();
+                }
+                else
+                {
+                    snackBarIsOpen = true;
+                    msg = "Sin registros para importar";
+                }
+
+            }
+
+            isLoading = false;
+
+            await InvokeAsync(() => { this.StateHasChanged(); });
+
+        }
+        catch (Exception ex)
+        {
+
+            snackBarIsOpen = true;
+            msg = ex.StackTrace;
+
+        }
+
+        async Task<DataTable> GetXls(string spName, object[] _param)
+        {
+
+            DataTable dt = new DataTable();
+            DataTable dtTemp = new DataTable();
+
+
+            try
+            {
+
+                int nreg = 0;
+                int pagenumber = 1;
+                int tReg = 0;
+                do
+                {
+                    response = "Procesando Pagina " + pagenumber;
+                    await InvokeAsync(async () => { this.StateHasChanged(); });
+                    var p = _param.ToList();
+                    p.Add(pagenumber);
+                    dtTemp = await todoItemService.GetDataSPDt(spName, p.ToArray());
+                    if (pagenumber == 1)
+                        dt = dtTemp.Clone();
+                    nreg = dtTemp.Rows.Count;
+                    tReg += nreg;
+                    foreach (DataRow dr in dtTemp.Rows)
+                    {
+                        dt.Rows.Add(dr.ItemArray);
+                    }
+                    pagenumber++;
+                } while (nreg > 0);
+
+                response = "Proceso Finalizado, registros cargados " + tReg;
+                if (dt.Rows.Count > 0)
+                {
+                    //var dt = HelperFuncs.ToDataTable<Rediferido>(rediferidos);
+                    var ms = await todoItemService.WriteExcelWithNPOI("xlsx", dt);
+                    ms.Position = 0;
+                    using var streamRef = new DotNetStreamReference(stream: ms);
+                    await JSRuntime.InvokeVoidAsync("downloadFileFromStream", spName + ".xlsx", streamRef);
+                    //await JSRuntime.InvokeAsync<object>("saveAsFile", spName + ".xlsx", ms.ToArray()).AsTask();
+                }
+                else
+                {
+                    snackBarIsOpen = true;
+                    msg = "Sin registros para importar";
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                snackBarIsOpen = true;
+                msg = "Excepcion no controlada " + ex.Message;
+
+            }
+            return dt;
+        }
+
+
+
+    }
+
+}
+

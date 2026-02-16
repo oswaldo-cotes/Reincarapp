@@ -10,9 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Radzen;
 using Reincarapp.Data;
 using Reincarapp.Models.reincardb;
-//using Reincarapp.Pages.Configuracion.Seguridad.Usuarios;
 
-namespace Reincarapp.Components
+
+namespace Reincarapp.Pages
 {
     public class MyComponentBase : ComponentBase
     {

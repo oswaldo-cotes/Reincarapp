@@ -447,7 +447,7 @@ namespace Reincarapp.Components.Pages.Transaccional.Gestionar.ClienteDeuda
                 {
                     Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter) ? "true" : grid0.Query.Filter)}",
                     OrderBy = $"{grid0.Query.OrderBy}",
-                    Expand = "EstadoClienteDeudum,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento",
+                    Expand = "EstadoClienteDeuda,Cliente,Persona,Usuario,Usuario1,Asignacion,ResultadoEvento1,ResultadoEvento",
                     Select = string.Join(",", grid0.ColumnsCollection
                         .Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property))
                         .Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))

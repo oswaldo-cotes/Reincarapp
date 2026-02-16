@@ -1,0 +1,100 @@
+@page "/add-cliente"
+@attribute [Authorize(Roles="Administrador")]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+
+<PageTitle>Add Cliente</PageTitle>
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Cliente</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Cliente" Data="@cliente" Visible="@(cliente != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Nombre Cliente" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cliente.Nombre_Cliente" Name="Nombre_Cliente" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="activo" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cliente.Activo" Name="activo" />
+              </ChildContent>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Tipo Cliente" Variant="Variant.Text">
+                <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipoClientesForidTipoCliente" TextProperty="nombre" ValueProperty="id_tipo_cliente" AllowClear=true
+                                            style="display: block; width: 100%" @bind-Value="@cliente.id_tipo_cliente" Name="id_tipo_cliente" />
+                </ChildContent>
+            </RadzenFormField>
+
+            <RadzenFormField Text="spins" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cliente.sp_ins" Name="sp_ins" Disabled="true" />
+              </ChildContent>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Tabla" Variant="Variant.Text">
+                <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cliente.tabla" Name="tabla" />
+                </ChildContent>
+            </RadzenFormField>
+            
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        cliente = new Reincarapp.Models.reincardb.Cliente();
+
+        tipoClientesForidTipoCliente = await reincardbService.GetTipoCliente();
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.Cliente cliente;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.TipoCliente> tipoClientesForidTipoCliente;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            if (cliente.id_tipo_cliente == 1){
+                cliente.sp_ins = "SP_INSERT_GENERICO";
+                cliente.tabla = "cliente_deuda_dato";
+            }
+            else{
+                cliente.sp_ins = "SP_INSERT_BASE_JUR";
+            }
+
+
+            await reincardbService.CreateCliente(cliente);
+            DialogService.Close(cliente);
+        }
+        catch (Exception ex)
+        {
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        DialogService.Close(null);
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+}

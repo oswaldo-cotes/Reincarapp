@@ -1,0 +1,325 @@
+@page "/informesdesc"
+@attribute [Authorize(Roles="Administrador,Administrador Cliente")]
+<h3>Informes Consolidados</h3>
+
+@using MatBlazor;
+@using System.IO;
+@using System.Data;
+@using MySql.Data.MySqlClient;
+@using Reincarapp.Models
+
+@* @using BlazorApp1.Data
+@using BlazorApp1.Models
+@using BlazorApp1.ModelReincar*@
+@inject TodoItemService todoItemService
+
+@using System.Net.Http
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IConfiguration config
+
+@inject IJSRuntime JSRuntime
+@using Microsoft.Extensions.Configuration;
+@inject SecurityService securityService
+@inherits MyComponentBase
+
+
+<div class="row">
+
+    <MatDatePicker @bind-Value="@fIni" Label="Fecha Inicio" Format="dd/MM/yyyy" ></MatDatePicker>
+    <MatDatePicker @bind-Value="@fFin" Label="Fecha Fin" Maximum="@(new DateTime(@fIni.Value.Year, 
+                                   @fIni.Value.Month, 
+                                   DateTime.DaysInMonth(@fIni.Value.Year, 
+                                                        @fIni.Value.Month)))" 
+                                   Minimum ="@(new DateTime(@fIni.Value.Year,@fIni.Value.Month,1))" Format="dd/MM/yyyy"></MatDatePicker>
+
+
+</div>
+
+
+
+
+<MatTabGroup>
+@*
+    @if (securityService.IsInRole(new string[] { "Administrador" }))
+    {
+        <MatTab Label="Credivalores">
+            <p>
+                <div class="row">
+                    <MatButton Style="margin: 5px" Outlined="true" OnClick="@(e => Export("SP_GET_CV_C1_2"))" Disabled="@(!closed)">CV C1</MatButton>
+                    <MatButton Style="margin: 5px" Outlined="true" OnClick="@(e => Export("SP_GET_VR2"))" Disabled="@(!closed)">VR2</MatButton>
+
+                    <MatButton Style="margin: 5px" Outlined="true" OnClick="@(e => Export("DIARIO"))">Informe Diario</MatButton>
+                        <MatButton Style="margin: 5px" Outlined="true" OnClick="@(e => Export("HORA"))">Informe Por Hora</MatButton>
+                        <MatButton Style="margin: 5px" Outlined="true" OnClick="@(e => Export("BASE VIGENTE"))">Base Vigente</MatButton>
+                </div>
+
+            </p>
+        </MatTab>
+
+    }*@
+
+  
+
+    @if (securityService.IsInRole(new string[] { "Administrador" }) || (securityService.IsInRole(new string[] { "Administrador Cliente" }) && (usuarioBd != null && usuarioBd.UsuarioCliente.Count > 0 && usuarioBd.UsuarioCliente.Select(x => x.Id_Cliente).Contains(7))))
+    {
+        <MatTab Label="Coomultrasan">
+            <p>
+                <MatButton Outlined="true" OnClick="@(e => Export("SP_GET_INF_COOMULTRASAN_V2"))" Disabled="@(!closed)">Informe Coomultrasan</MatButton>
+            </p>
+        </MatTab>
+
+    }
+
+    @*
+    @if (securityService.IsInRole(new string[] { "Administrador" })) /*|| (rolesCarga.Contains(rol) && TagIds.Contains(7)))*/
+    {
+        <MatTab Label="Juridico">
+            <p>
+                <MatButton Style="margin: 5px" Outlined="true" OnClick="@(e => Export("SP_GET_MEJOR_GESTION_JUR"))" Disabled="@(!closed)">MEJOR GESTION JURIDICO</MatButton>
+            </p>
+        </MatTab>
+
+    }*@
+
+
+</MatTabGroup>
+
+@response
+
+<MatProgressBar Indeterminate="true" Closed="@closed"></MatProgressBar>
+
+@*<RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="margin-bottom: 20px" Visible="@closed" />*@
+
+@*<RadzenProgressBar Visible="@visible" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Style="margin-bottom: 20px" />*@
+
+<MatSnackbar @bind-IsOpen="@snackBarIsOpen">
+    <MatSnackbarContent>@msg</MatSnackbarContent>
+    <MatSnackbarActions>
+        <MatButton OnClick="@(e => { snackBarIsOpen = false; })">Aceptar</MatButton>
+    </MatSnackbarActions>
+</MatSnackbar>
+
+
+
+
+@code {
+
+
+
+    string userIdG = "";
+    string rol = "";
+
+    public DateTime? fIni { get; set; } = DateTime.Now;
+    public DateTime? fFin { get; set; } = DateTime.Now;
+
+    Dictionary<string, string> sps = new Dictionary<string, string>()
+{
+            {"CVC1", "SET SESSION group_concat_max_len = 10000; select * from VW_INFORME_GESTION_CV_C1 where fecha_gestion between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"VR2", "select * from VW_INFORME_GESTION_VR2 where fecha_llamada between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"DIARIO", "select * from VW_INFORME_DIARIO where fecha_gestion between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"HORA","select * from vw_informe_hora where id_cliente = 14 and  fecha_creacion_evento between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+            {"BASE VIGENTE","select c.identificacion,c.NOMBRE_PLASTICO,c.Fecha_Inicial from credivalores c where c.fecha_final is null" },
+            {"TRANSITO","Call SP_GET_INFORME_CONS_TRANSITO()" },
+            {"COOMULTRASAN","select * from vw_informe_coomultrasan where fecha_gestion between '" + "[fini]" + "' and '" + "[ffin]" + " 23:59:59'" },
+        };
+
+    bool snackBarIsOpen = false;
+    string msg = "";
+    string clientes;
+    List<int> TagIds;
+
+    List<string> rolesCarga = new List<string>() { "1", "4", "6", "12", "13" };
+
+    bool closed = true;
+    bool visible = false;
+
+    string response = "";
+
+
+
+
+
+    async Task<DataTable> GetXls(string spName)
+    {
+
+        DataTable dt = new DataTable();
+        DataTable dtTemp = new DataTable();
+
+
+        try
+        {
+
+            var dates = Enumerable.Range(0, (fFin.Value - fIni.Value).Days + 1)
+                      .Select(i => fIni.Value.AddDays(i));
+            int nreg = 0;
+            int i=1;
+            int tReg = 0;
+            foreach (var date in dates)
+            {
+
+
+                int daynumber = date.Day;
+                int montNUmber = date.Month;
+                int yearNumber = date.Year;
+
+
+                response = "Procesando Pagina " + i;
+                await InvokeAsync(async () => { this.StateHasChanged(); });
+                dtTemp = await DataAccessMySql.execSpPcRetTbl2(spName, new object[] { daynumber,montNUmber,yearNumber }, config["ConnectionStrings:reincardbConnection"]);
+                if (i == 1)
+                    dt = dtTemp.Clone();
+
+                nreg = dtTemp.Rows.Count;
+                tReg += nreg;
+
+                foreach (DataRow dr in dtTemp.Rows)
+                {
+                    dt.Rows.Add(dr.ItemArray);
+                }
+                tReg += dt.Rows.Count;
+
+                i++;
+
+
+            }
+
+            //dt = await DataAccessMySql.execSpPcRetTbl2("SP_WORK_NO_FINISH", new object[] { DBNull.Value }, config["ConnectionStrings:reincardbConnection"]);
+
+            response = "Proceso Finalizado, registros cargados " + dt.Rows.Count;
+            if (dt.Rows.Count > 0)
+            {
+                //var dt = HelperFuncs.ToDataTable<Rediferido>(rediferidos);
+                MemoryStream ms = new MemoryStream();
+                ms = await todoItemService.WriteExcelWithNPOI("xlsx", dt);
+                using var streamRef = new DotNetStreamReference(stream: ms);
+                await JSRuntime.InvokeVoidAsync("downloadFileFromStream", spName + ".xlsx", streamRef);
+                //await JSRuntime.InvokeAsync<object>("saveAsFile", spName + ".xlsx", ms.ToArray()).AsTask();
+            }
+            else
+            {
+
+
+                
+
+                snackBarIsOpen = true;
+                msg = "Sin registros para importar";
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            snackBarIsOpen = true;
+            msg = "Excepcion no controlada " + ex.Message;
+
+        }
+        return dt;
+    }
+
+
+    async Task<DataTable> GetXlsTransito(string spName)
+    {
+
+        DataTable dt = new DataTable();
+        DataTable dtTemp = new DataTable();
+
+
+        try
+        {
+
+            int nreg = 0;
+            int pagenumber = 1;
+            int tReg = 0;
+            do
+            {
+                response = "Procesando Pagina " + pagenumber;
+                await InvokeAsync(async () => { this.StateHasChanged(); });
+                dtTemp = await DataAccessMySql.execSpPcRetTbl2(spName, new object[] { pagenumber }, config["MySettings:MySqlDbConn"]);
+
+                nreg = dtTemp.Rows.Count;
+
+                int i = 1;
+                foreach (DataRow dr in dtTemp.Rows)
+                {
+                    //
+                    var dtTemp1 = await DataAccessMySql.execSpPcRetTbl2("SP_GET_INF_TRANSITO", new object[] { dr["id_transito_buc"].ToString() },config["MySettings:MySqlDbConn"]);
+
+                    if (dtTemp1.Rows.Count > 0)
+                    {
+
+                        if (i == 1)
+                            dt = dtTemp1.Clone();
+
+                        foreach (DataRow dr1 in dtTemp1.Rows)
+                            dt.Rows.Add(dr1.ItemArray);
+
+                        tReg++;
+
+                        i++;
+
+                    }
+
+
+                }
+                pagenumber++;
+            } while (nreg > 0);
+
+            response = "Proceso Finalizado, registros cargados " + tReg;
+            if (dt.Rows.Count > 0)
+            {
+                //var dt = HelperFuncs.ToDataTable<Rediferido>(rediferidos);
+                var ms = await todoItemService.WriteExcelWithNPOI("xlsx", dt);
+                await JSRuntime.InvokeAsync<object>("saveAsFile", spName + ".xlsx", ms.ToArray()).AsTask();
+            }
+            else
+            {
+                snackBarIsOpen = true;
+                msg = "Sin registros para importar";
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+            snackBarIsOpen = true;
+            msg = "Excepcion no controlada " + ex.Message;
+
+        }
+        return dt;
+    }
+
+    async void Export(string strView)
+    {
+        try
+        {
+            DataTable dt = new DataTable();
+            response = "Procesando";
+            closed = false;
+
+            if (strView != "SP_GET_BASE_TRANSITO")
+                dt = await Task.Run(() => GetXls(strView));
+            else
+                dt = await Task.Run(() => GetXlsTransito(strView));
+            closed = true;
+
+
+
+            this.StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+            snackBarIsOpen = true;
+            msg = ex.StackTrace;
+
+        }
+
+    }
+
+}

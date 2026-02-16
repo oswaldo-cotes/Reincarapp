@@ -1,0 +1,34 @@
+@page "/edit-basecampo"
+@attribute [Authorize]
+
+<PageTitle>Edit Basecampo</PageTitle>
+
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Basecampo</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Basecampo" Data="@basecampo" Visible="@(basecampo != null)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Nombre" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@basecampo.Nombre" Name="Nombre" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Campo Clave Id" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenNumeric style="display: block; width: 100%" @bind-Value="@basecampo.CampoClaveId" Name="CampoClaveId" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Base" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@basesForBaseId" TextProperty="NombreArchivo" ValueProperty="Id" AllowClear=true
+                        Disabled=@(hasBaseIdValue)  style="display: block; width: 100%" @bind-Value="@basecampo.BaseId" Name="BaseId"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+

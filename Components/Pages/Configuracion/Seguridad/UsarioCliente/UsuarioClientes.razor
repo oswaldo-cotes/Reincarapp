@@ -1,0 +1,146 @@
+@page "/usuario-clientes"
+@attribute [Authorize(Roles="Administrador")]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+
+<PageTitle>UsuarioClientes</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="UsuarioClientes" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"  AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@usuarioClientes"    TItem="Reincarapp.Models.reincardb.UsuarioCliente" RowDoubleClick="@EditRow" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" >
+            <Columns>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Cliente.Nombre_Cliente" Title="Cliente">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Usuario.Nombre_Usuario" Title="Usuario">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Usuario.Correo_Electronico" Title="Email">
+                </RadzenDataGridColumn>
+
+
+
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="usuarioCliente">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                            Shade="Shade.Lighter" Variant="Variant.Flat"
+                            Click=@(args => GridDeleteButtonClick(args, usuarioCliente)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>
+@code {
+
+    [Parameter]
+    public long Id_Usuario { get; set; }
+
+    protected IEnumerable<Reincarapp.Models.reincardb.UsuarioCliente> usuarioClientes;
+
+    protected RadzenDataGrid<Reincarapp.Models.reincardb.UsuarioCliente> grid0;
+
+    protected string search = "";
+
+    protected async Task Search(ChangeEventArgs args)
+    {
+        search = $"{args.Value}";
+
+        await grid0.GoToPage(0);
+
+        usuarioClientes = await reincardbService.GetUsuarioCliente(new Query { Expand = "Cliente,Usuario" });
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id_Usuario > 0)
+            usuarioClientes = (await reincardbService.GetUsuarioCliente(new Query { Expand = "Cliente,Usuario" })).Where(x => x.Id_Usuario == this.Id_Usuario);
+        else
+            usuarioClientes = (await reincardbService.GetUsuarioCliente(new Query { Expand = "Cliente,Usuario" }));
+    }
+
+    protected async Task AddButtonClick(MouseEventArgs args)
+    {
+        await DialogService.OpenAsync<AddUsuarioCliente>("Add UsuarioCliente", new Dictionary<string, object> { {"Id_Usuario", this.Id_Usuario}});
+        await grid0.Reload();
+    }
+
+    protected async Task EditRow(DataGridRowMouseEventArgs<Reincarapp.Models.reincardb.UsuarioCliente> args)
+    {
+        await DialogService.OpenAsync<EditUsuarioCliente>("Edit UsuarioCliente", new Dictionary<string, object> { {"Id_Usuario_Cliente", args.Data.Id_Usuario_Cliente} });
+    }
+
+    protected async Task GridDeleteButtonClick(MouseEventArgs args, Reincarapp.Models.reincardb.UsuarioCliente usuarioCliente)
+    {
+        try
+        {
+            if (await DialogService.Confirm("Are you sure you want to delete this record?") == true)
+            {
+                var deleteResult = await reincardbService.DeleteUsuarioCliente(usuarioCliente.Id_Usuario_Cliente);
+
+                if (deleteResult != null)
+                {
+                    await grid0.Reload();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = $"Error",
+                Detail = $"Unable to delete UsuarioCliente"
+            });
+        }
+    }
+
+    protected async Task ExportClick(RadzenSplitButtonItem args)
+    {
+        if (args?.Value == "csv")
+        {
+            await reincardbService.ExportUsuarioClienteToCSV(new Query
+        {
+            Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
+            OrderBy = $"{grid0.Query.OrderBy}",
+            Expand = "Cliente,Usuario",
+            Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
+        }, "UsuarioClientes");
+        }
+
+        if (args == null || args.Value == "xlsx")
+        {
+            await reincardbService.ExportUsuarioClienteToExcel(new Query
+        {
+            Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
+            OrderBy = $"{grid0.Query.OrderBy}",
+            Expand = "Cliente,Usuario",
+            Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
+        }, "UsuarioClientes");
+        }
+    }
+}

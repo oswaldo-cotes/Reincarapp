@@ -40,72 +40,38 @@
             <RadzenImage Path="images/logo.png"  style="width: 48px; height: 48px;" AlternateText="Application logo"></RadzenImage>
             <RadzenText Text="Reincarapp" TextStyle="Radzen.Blazor.TextStyle.Subtitle1" class="rz-mb-0" style="color: var(--rz-sidebar-color);" />
         </RadzenStack>
+
         <RadzenPanelMenu>
             <RadzenPanelMenuItem Text="Home" Path="" />
-            <RadzenPanelMenuItem Text="Configuracion" Path="" Visible="@Security.IsInRole(new string[] { "Administrador" })">
+            <RadzenPanelMenuItem Text="Configuracion"Visible="@Security.IsInRole(new string[] { "Administrador" })">
                 <RadzenPanelMenuItem Text="Clientes" Path="clientes" />
-                <RadzenPanelMenuItem Text="Personas" Path="personas" />
+                <RadzenPanelMenuItem Text="Asignar CLientes a usuarios" Path="usuario-cliente2" />
                 <RadzenPanelMenuItem Text="Bases" Path="bases" />
                 <RadzenPanelMenuItem Text="Resultado Evento" Path="resultado-eventos" />
                 <RadzenPanelMenuItem Text="Tipo Comunicacion" Path="tipo-comunicacions" />
                 <RadzenPanelMenuItem Text="Clasificacion Adicional" Path="clasificacion-adicionals" />
-                <RadzenPanelMenuItem Text="Seguridad y Accesos" Path="">
-                    <RadzenPanelMenuItem Text="Usuarios" Path="usuarios" />
-                    <RadzenPanelMenuItem Text="Roles Usuarios" Path="usuario-rols" />
-                    <RadzenPanelMenuItem Text="Clientes Usuarios" Path="usuario-clientes" />
-                </RadzenPanelMenuItem>
-
-
-                @*  <RadzenPanelMenuItem Text="Modulo De Citas" Path="">
-                    <RadzenPanelMenuItem Text="MEspecialidads" Path="m-especialidads" />
-                    <RadzenPanelMenuItem Text="MEspecialidadMedicos" Path="m-especialidad-medicos" />
-                    <RadzenPanelMenuItem Text="MEstadoCita" Path="m-estado-cita" />
-                    <RadzenPanelMenuItem Text="MMedicos" Path="m-medicos" />
-                    <RadzenPanelMenuItem Text="MSedes" Path="m-sedes" />
-                </RadzenPanelMenuItem> *@
-
-
+               
             </RadzenPanelMenuItem>
-            @*     <RadzenPanelMenuItem Text="Modulo de citas" Path="m-cita" /> *@
+      
             <RadzenPanelMenuItem Text="Personas" Path="personas" Visible="@Security.IsInRole(new string[] { "Administrador", "Consulta" })" />
             <RadzenPanelMenuItem Text="Gestionar" Path="cliente-deuda" Visible="@(Security.IsAuthenticated())">
-
-                @* <RadzenPanelMenuItem Text="Bloqueo Por Contacto" Path="bloqueocontactos" /> *@
-                @*   <RadzenPanelMenuItem Text="Mis Clientes" Path="misclientes" > *@
-
-                @*   @if (Security.IsInRole(new string[] { "Administrador" }))
-                    {
-                    }
-                    else
-                    {
-                        if (usuario.UsuarioClientes != null && usuario.UsuarioClientes.Count > 0){
-                             foreach (var u in usuario.UsuarioClientes)
-                            {
-                                <RadzenPanelMenuItem Text="@(u.Cliente.Nombre_Cliente)" Path="contacts" />
-                            }
-                        }
-                        else
-                        {
-                            <RadzenPanelMenuItem Text="No tienes clientes configurados" Path="" />
-                        }
-                        
-                    } *@
-                @*    </RadzenPanelMenuItem> *@
             </RadzenPanelMenuItem>
-            <RadzenPanelMenuItem Text="Informes" Path="" Visible="@Security.IsInRole(new string[] { "Administrador", "Coordinador Cartera" })">
+            <RadzenPanelMenuItem Text="Informes"  Visible="@Security.IsInRole(new string[] { "Administrador", "Coordinador Cartera" })">
                 <RadzenPanelMenuItem Text="Descarga de informes" Path="informesdesc" />
                 <RadzenPanelMenuItem Text="Informes" Path="nuevosinformes" />
             </RadzenPanelMenuItem>
 
-            <RadzenPanelMenuItem Text="Cargue" Path="" Visible="@Security.IsInRole(new string[] { "Administrador", "Coordinador Cartera" })">
+            <RadzenPanelMenuItem Text="Cargue"  Visible="@Security.IsInRole(new string[] { "Administrador", "Coordinador Cartera" })">
                 <RadzenPanelMenuItem Text="Cargar Base" Path="carguedatos" />
             </RadzenPanelMenuItem>
             @*    *@
-
+          
 
 
 
         </RadzenPanelMenu>
+
+       
         <RadzenStack AlignItems="Radzen.AlignItems.Center" Gap="0" class="rz-py-4 rz-py-lg-6" Style="padding: var(--rz-panel-menu-item-padding);">
             <RadzenText Text="Reincarapp v1.0.0" TextStyle="Radzen.Blazor.TextStyle.Caption" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Center" />
             <RadzenText Text="Copyright Ⓒ 2026" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-mb-0" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Center" />

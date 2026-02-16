@@ -1,0 +1,37 @@
+@page "/add-usuario-cliente2"
+@attribute [Authorize]
+
+<PageTitle>Add UsuarioCliente</PageTitle>
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save UsuarioCliente</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.UsuarioCliente" Data="@(usuarioCliente)" Visible="@(usuarioCliente != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Cliente" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@(clienteForIdCliente)" TextProperty="tabla" ValueProperty="Id_Cliente" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@(usuarioCliente.Id_Cliente)" Name="Id_Cliente"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Usuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@(usuarioForIdUsuario)" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@(usuarioCliente.Id_Usuario)" Name="Id_Usuario"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Aspnetusers" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@(aspnetusersForAspNetUserId)" TextProperty="UserName" ValueProperty="Id" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@(usuarioCliente.AspNetUserId)" Name="AspNetUserId"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+

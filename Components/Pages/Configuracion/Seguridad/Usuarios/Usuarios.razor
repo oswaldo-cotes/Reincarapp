@@ -1,0 +1,229 @@
+@page "/usuarios"
+@using Reincarapp.Models
+@attribute [Authorize(Roles="Administrador")]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+
+<PageTitle>Usuarios</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="Usuarios" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"  AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@usuarios"    TItem="Reincarapp.Models.reincardb.Usuario" RowDoubleClick="@EditRow" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" >
+            <Columns>
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center" Title="Migrar a nueva version?">
+                    <Template Context="usuario">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="fiber_new" Size="ButtonSize.Medium"
+                                        Shade="Shade.Lighter" Variant="Variant.Flat"
+                                        Click=@(args => GridDeleteButtonClick(args, usuario)) @onclick:stopPropagation="true"
+                                          Visible=@(!applicationUsers.Any(x=>x.UserName == usuario.Usuario1 || x.Email == usuario.Correo_Electronico)) 
+                                          />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Nombre_Usuario" Title="Nombre Usuario">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Usuario1" Title="Usuario">
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Password" Title="Password">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Correo_Electronico" Title="Correo Electronico">
+                </RadzenDataGridColumn>
+                
+
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Correo_Electronico" Title="Clientes">
+                    <Template>
+
+
+                        @(string.Join(",",context.UsuarioCliente?.Select(x=>x.Cliente?.Nombre_Cliente).ToList()))
+
+                    </Template>
+                       
+                </RadzenDataGridColumn>
+
+                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Correo_Electronico" Title="Roles">
+                    <Template>
+
+
+                        @(string.Join(",",context.UsuarioRol?.Select(x=>x.Rol?.Nombre_Rol).ToList()))
+
+                    </Template>
+                       
+                </RadzenDataGridColumn>
+                
+
+                
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Cedula" Title="Cedula">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Fecha_Ingreso" Title="Fecha Ingreso">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Fecha_Retiro" Title="Fecha Retiro">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Direccion" Title="Direccion">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Fecha_Nacimiento" Title="Fecha Nacimiento">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Telefono" Title="Telefono">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Cargo" Title="Cargo">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="EstadoUsuario.estado" Title="Estado Usuario">
+                </RadzenDataGridColumn>
+               
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>
+@code {
+
+    protected IEnumerable<Reincarapp.Models.reincardb.Usuario> usuarios;
+
+    protected RadzenDataGrid<Reincarapp.Models.reincardb.Usuario> grid0;
+
+    protected string search = "";
+
+    [Inject]
+    protected SecurityService Security { get; set; }
+
+
+
+    protected async Task Search(ChangeEventArgs args)
+    {
+        search = $"{args.Value}";
+
+        await grid0.GoToPage(0);
+
+        usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Nombre_Usuario.Contains(@0) || i.Usuario1.Contains(@0) || i.Correo_Electronico.Contains(@0) || i.Cedula.Contains(@0) ", FilterParameters = new object[] { search }, Expand = "EstadoUsuario,UsuarioClientes,UsuarioRols" });
+    }
+
+    List<ApplicationUser> applicationUsers  = new List<ApplicationUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Nombre_Usuario.Contains(@0) || i.Usuario1.Contains(@0) || i.Correo_Electronico.Contains(@0) || i.Cedula.Contains(@0) ", FilterParameters = new object[] { search }, Expand = "EstadoUsuario,UsuarioClientes,UsuarioClientes.Cliente,UsuarioRols,UsuarioRols.Rol" });
+        applicationUsers = (await Security.GetUsers()).ToList();
+    }
+
+    protected async Task AddButtonClick(MouseEventArgs args)
+    {
+        await DialogService.OpenAsync<AddUsuario>("Add Usuario", null);
+        await grid0.Reload();
+    }
+
+    protected async Task EditRow(DataGridRowMouseEventArgs<Reincarapp.Models.reincardb.Usuario> args)
+    {
+        await DialogService.OpenAsync<EditUsuario>("Edit Usuario", new Dictionary<string, object> { {"Id_Usuario", args.Data.Id_Usuario} });
+    }
+
+    protected async Task GridDeleteButtonClick(MouseEventArgs args, Reincarapp.Models.reincardb.Usuario usuario)
+    {
+        try
+        {
+            if (await DialogService.Confirm("Seguro de migrar este usuario a nueva version?") == true)
+            {
+
+                var roles = await Security.GetRoles();
+
+                var rolesApp = await reincardbService.GetUsuarioRol(new Query { Filter = $@"i => i.Id_Usuario == @0", FilterParameters = new object[] { usuario.Id_Usuario }, Expand = "Rol" });
+                if (rolesApp == null || rolesApp.Count() == 0)
+                    throw new Exception("El usuario no tiene roles asignados en el sistema antiguo, por favor asignele un rol antes de migrarlo.");
+
+
+                var userroles = roles.Where(x => rolesApp.Select(y => y.Rol.Nombre_Rol).Contains(x.Name)).ToList();
+                if (userroles == null || userroles.Count() == 0)
+                    throw new Exception("El usuario no tiene roles asignados en el sistema nuevo, por favor asignele un rol antes de migrarlo.");
+
+                var user = new Reincarapp.Models.ApplicationUser
+                                        {
+                                            UserName = usuario.Usuario1,
+                                            Email = "noemail@reincar.com.co",
+                                            Password = usuario.Password,
+                                            ConfirmPassword = usuario.Password,
+                                            Roles = userroles
+
+                                        };
+
+
+
+                await Security.CreateUser(user);
+
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = $"Operacion exitosa",
+                    Detail = $"Usuario migrado con exito"
+                });
+
+
+
+                // var deleteResult = await reincardbService.DeleteUsuario(usuario.Id_Usuario);
+
+                // if (deleteResult != null)
+                // {
+                //     await grid0.Reload();
+                // }
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = $"Error",
+                Detail = $"Unable to migrar Usuario {ex.StackTrace}  {ex.InnerException?.Message}"
+            });
+        }
+    }
+
+    protected async Task ExportClick(RadzenSplitButtonItem args)
+    {
+        if (args?.Value == "csv")
+        {
+            await reincardbService.ExportUsuarioToCSV(new Query
+        {
+            Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
+            OrderBy = $"{grid0.Query.OrderBy}",
+            Expand = "EstadoUsuario",
+            Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
+        }, "Usuarios");
+        }
+
+        if (args == null || args.Value == "xlsx")
+        {
+            await reincardbService.ExportUsuarioToExcel(new Query
+        {
+            Filter = $@"{(string.IsNullOrEmpty(grid0.Query.Filter)? "true" : grid0.Query.Filter)}",
+            OrderBy = $"{grid0.Query.OrderBy}",
+            Expand = "EstadoUsuario",
+            Select = string.Join(",", grid0.ColumnsCollection.Where(c => c.GetVisible() && !string.IsNullOrEmpty(c.Property)).Select(c => c.Property.Contains(".") ? c.Property + " as " + c.Property.Replace(".", "") : c.Property))
+        }, "Usuarios");
+        }
+    }
+}

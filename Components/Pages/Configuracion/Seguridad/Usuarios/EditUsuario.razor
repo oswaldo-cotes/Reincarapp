@@ -1,0 +1,159 @@
+@page "/edit-usuario"
+@attribute [Authorize(Roles="Administrador")]
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+
+@inject reincardbService reincardbService
+
+<PageTitle>Edit Usuario</PageTitle>
+<RadzenRow>
+    <RadzenColumn SizeMD="9">
+    <RadzenLabel style="font-weight: bold" Text="Item no longer available." Visible="@(!canEdit)" />
+    </RadzenColumn>
+    <RadzenColumn SizeMD="3">
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" style="margin-bottom: 20px" Text="Close" Visible="@(!canEdit)" Click="@CancelButtonClick" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow>
+    <RadzenColumn SizeMD="9">
+    <RadzenLabel style="font-weight: bold" Text="Another user has made conflicting changes to one or more of the fields you have modified. Please reload." Visible="@hasChanges" />
+    </RadzenColumn>
+    <RadzenColumn SizeMD="3">
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="autorenew" style="margin-bottom: 20px" Text="Reload" Visible="@hasChanges" Click="@ReloadButtonClick" />
+    </RadzenColumn>
+</RadzenRow>
+
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Usuario</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Usuario" Data="@usuario" Visible="@(usuario != null && canEdit)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Nombre Usuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Nombre_Usuario" Name="Nombre_Usuario" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Usuario1" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Usuario1" Name="Usuario1" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Password" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenPassword pass style="display: block; width: 100%" @bind-Value="@usuario.Password" Name="Password" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Correo Electronico" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Correo_Electronico" Name="Correo_Electronico" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Cedula" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Cedula" Name="Cedula" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Fecha Ingreso" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@usuario.Fecha_Ingreso" Name="Fecha_Ingreso" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Fecha Retiro" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@usuario.Fecha_Retiro" Name="Fecha_Retiro" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Direccion" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Direccion" Name="Direccion" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Fecha Nacimiento" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="dd/MM/yyyy" style="display: block; width: 100%" @bind-Value="@usuario.Fecha_Nacimiento" Name="Fecha_Nacimiento" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Telefono" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Telefono" Name="Telefono" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Cargo" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@usuario.Cargo" Name="Cargo" />
+              </ChildContent>
+            </RadzenFormField>
+          @*   <RadzenFormField Text="Estado Usuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@estadoUsuariosForEstado" TextProperty="estado" ValueProperty="id_estado_usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@usuario.Estado" Name="Estado"
+                           />
+              </ChildContent>
+            </RadzenFormField> *@
+
+
+            <Reincarapp.Pages.Configuracion.Seguridad.UsarioCliente.UsuarioClientes Id_Usuario="@Id_Usuario"    ></Reincarapp.Pages.Configuracion.Seguridad.UsarioCliente.UsuarioClientes>
+            <Reincarapp.Pages.Configuracion.Seguridad.UsuarioRol.UsuarioRols Id_Usuario="@Id_Usuario"></Reincarapp.Pages.Configuracion.Seguridad.UsuarioRol.UsuarioRols> 
+
+
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
+@code {
+
+    [Parameter]
+    public long Id_Usuario { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuario = await reincardbService.GetUsuarioByIdUsuario(Id_Usuario);
+
+        estadoUsuariosForEstado = await reincardbService.GetEstadoUsuario();
+    }
+    protected bool errorVisible;
+    protected Reincarapp.Models.reincardb.Usuario usuario;
+
+    protected IEnumerable<Reincarapp.Models.reincardb.EstadoUsuario> estadoUsuariosForEstado;
+
+    protected async Task FormSubmit()
+    {
+        try
+        {
+            await reincardbService.UpdateUsuario(Id_Usuario, usuario);
+            DialogService.Close(usuario);
+        }
+        catch (Exception ex)
+        {
+            hasChanges = ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
+            canEdit = !(ex is Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException);
+            errorVisible = true;
+        }
+    }
+
+    protected async Task CancelButtonClick(MouseEventArgs args)
+    {
+        DialogService.Close(null);
+    }
+
+
+    protected bool hasChanges = false;
+    protected bool canEdit = true;
+
+
+    protected async Task ReloadButtonClick(MouseEventArgs args)
+    {
+       reincardbService.Reset();
+        hasChanges = false;
+        canEdit = true;
+
+        usuario = await reincardbService.GetUsuarioByIdUsuario(Id_Usuario);
+    }
+}

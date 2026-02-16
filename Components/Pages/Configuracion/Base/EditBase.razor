@@ -1,0 +1,66 @@
+@page "/edit-base"
+
+@attribute [Authorize]
+
+<PageTitle>Edit Base</PageTitle>
+
+    <RadzenColumn SizeMD=12>
+        <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save Base</RadzenAlert>
+        <RadzenTemplateForm TItem="Reincarapp.Models.reincardb.Base" Data="@_base" Visible="@(_base != null)" Submit="@FormSubmit">
+          <RadzenStack>
+            <RadzenFormField Text="Cliente" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@clientesForIdCliente" TextProperty="Nombre_Cliente" ValueProperty="Id_Cliente" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@_base.IdCliente" Name="IdCliente"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Tipobase" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@tipobasesForIdTipoBase" TextProperty="Nombre" ValueProperty="Id" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@_base.IdTipoBase" Name="IdTipoBase"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Usuario" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuario" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@_base.IdUsuario" Name="IdUsuario"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Usuario1" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDropDownDataGrid Data="@usuariosForIdUsuarioAct" TextProperty="Cargo" ValueProperty="Id_Usuario" AllowClear=true
+                          style="display: block; width: 100%" @bind-Value="@_base.IdUsuarioAct" Name="IdUsuarioAct"
+                           />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Nombre" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_base.Nombre" Name="Nombre" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Fecha Cre" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="MM/dd/yyyy" style="display: block; width: 100%" @bind-Value="@_base.FechaCre" Name="FechaCre" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Fecha Act" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenDatePicker DateFormat="MM/dd/yyyy" style="display: block; width: 100%" @bind-Value="@_base.FechaAct" Name="FechaAct" />
+              </ChildContent>
+            </RadzenFormField>
+            <RadzenFormField Text="Nombre Archivo" Variant="Variant.Text">
+                  <ChildContent>
+                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@_base.NombreArchivo" Name="NombreArchivo" />
+              </ChildContent>
+            </RadzenFormField>
+          </RadzenStack>
+          <RadzenStack style="margin-top:1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick"  />
+          </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenColumn>
+
