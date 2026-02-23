@@ -69,7 +69,7 @@
                     </ChildContent>
                     
                 </RadzenTabsItem>
-                <RadzenTabsItem Text="Tareas">
+                <RadzenTabsItem Text="@($"Tareas({registro.Tarea?.Count().ToString()})")">
                     <Reincarapp.Components.Pages.Transaccional.Gestionar.Tareas.Tareas ClienteDeudaId="@ClienteDeudaId" />
                 </RadzenTabsItem>
 

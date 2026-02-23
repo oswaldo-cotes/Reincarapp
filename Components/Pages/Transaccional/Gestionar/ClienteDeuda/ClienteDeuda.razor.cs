@@ -282,6 +282,7 @@ namespace Reincarapp.Components.Pages.Transaccional.Gestionar.ClienteDeuda
                     .AsNoTracking()
                     .Include(x => x.Cliente)
                     .Include(x => x.ClienteDeuda.Persona)
+                    .Include(x => x.ClienteDeuda.Tarea.Where(x=>x.Fecha_Ejecucion_Tarea == null))
                     .Include(x => x.ClienteDeuda.EstadoClienteDeuda)
                     .Include(x => x.ClienteDeuda.Usuario)
                     .Include(x => x.ClienteDeuda.Usuario1)

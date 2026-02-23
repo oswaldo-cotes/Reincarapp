@@ -413,18 +413,11 @@ namespace Reincarapp.Components.Pages
                                                  .Where(x=> x.Fecha_Ejecucion_Tarea == null)
                                                  .AsNoTracking()
                                                  .ToListAsync();
-
                     tareasPorEjec.ForEach(x =>
                     {
-
-
                         appointments.Add(new Appointment() { Start = x.Fecha_Realizacion_Tarea, End = x.Fecha_Realizacion_Tarea.AddMinutes(15), Text = x.Texto_Tarea + ". Asignado a : " + x.Aspnetusers?.UserName, Id = x.Id_Tarea, IdClienteDeuda = x.Id_Cliente_Deuda ?? 0 });
-
                     });
-
                     await scheduler.Reload();
-
-
                     StateHasChanged();
                 }
                 catch (Exception ex)
