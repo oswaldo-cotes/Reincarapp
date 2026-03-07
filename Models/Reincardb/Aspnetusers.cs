@@ -51,6 +51,8 @@ namespace Reincarapp.Models.reincardb
 
         public ICollection<Evento> Evento1 { get; set; }
 
+        public ICollection<Logapp> Logapp { get; set; }
+
         public ICollection<Tarea> Tarea { get; set; }
 
         public ICollection<Tarea> Tarea1 { get; set; }

@@ -1,16 +1,18 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Reincarapp.Data;
+using Reincarapp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Reincarapp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Reincarapp.Controllers
 {
@@ -22,15 +24,19 @@ namespace Reincarapp.Controllers
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly IWebHostEnvironment env;
         private readonly IConfiguration configuration;
+        private readonly reincardbContext2 reincardbContext2;
+        private readonly reincardbContext reincardbContext;
 
         public AccountController(IWebHostEnvironment env, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager, IConfiguration configuration)
+            RoleManager<ApplicationRole> roleManager, IConfiguration configuration, reincardbContext2 reincardbContext2, reincardbContext reincardbContext)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.env = env;
             this.configuration = configuration;
+            this.reincardbContext2 = reincardbContext2;
+            this.reincardbContext = reincardbContext;
         }
 
         private IActionResult RedirectWithError(string error, string redirectUrl = null)
@@ -77,6 +83,27 @@ namespace Reincarapp.Controllers
 
             if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(password))
             {
+
+
+                //if (!reincardbContext.Aspnetusers.Where(x => x.UserName == userName).Any()) { 
+                //    // usuario no migrado
+                //    var user = reincardbContext2.Usuario
+                //                                .Include(x=>x.UsuarioRol)
+                //                                .Include(x=>x.UsuarioCliente)
+                //                                .Where(x => x.Usuario1 == userName)
+                //                                .FirstOrDefault();
+                //    if (user != null) { 
+                    
+                    
+                //    }
+                //    else{ 
+                    
+                //    }
+
+
+                //}
+
+
                 var result = await signInManager.PasswordSignInAsync(userName, password, false, false);
 
                 if (result.Succeeded)

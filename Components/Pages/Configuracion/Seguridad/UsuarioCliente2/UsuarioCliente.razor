@@ -24,11 +24,11 @@
         <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="true"  AllowPaging="true"   AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@([5, 10, 20, 30]) 
             Data="@(usuarioClienteCollection)" TItem="Reincarapp.Models.reincardb.UsuarioCliente" RowDoubleClick="@EditRow">
             <Columns>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Cliente.tabla" Title="Cliente">
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Cliente.Nombre_Cliente" Title="Cliente">
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Usuario.Cargo" Title="Usuario">
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Aspnetusers.UserName" Title="Aspnetusers">
+           @*      <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Usuario.Cargo" Title="Usuario">
+                </RadzenDataGridColumn> *@
+                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Property="Aspnetusers.UserName" Title="Usuario">
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.UsuarioCliente" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
                     <Template Context="usuarioCliente">

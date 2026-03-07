@@ -51,17 +51,17 @@ namespace Reincarapp.Models.reincardb
 
         public TipoTarea TipoTarea { get; set; }
 
-        [MaxLength(95)]
+        [MaxLength(100)]
         public string CreatedBy { get; set; }
 
         public Aspnetusers Aspnetusers { get; set; }
 
-        [MaxLength(95)]
+        [MaxLength(100)]
         public string UpdatedBy { get; set; }
 
         public Aspnetusers Aspnetusers2 { get; set; }
 
-        [MaxLength(95)]
+        [MaxLength(100)]
         public string ProcessedBy { get; set; }
 
         public Aspnetusers Aspnetusers1 { get; set; }

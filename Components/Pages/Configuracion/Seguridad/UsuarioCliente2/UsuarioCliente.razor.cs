@@ -52,7 +52,8 @@ namespace Reincarapp.Components.Pages.Configuracion.Seguridad.UsuarioCliente2
         }
         protected override async Task OnInitializedAsync()
         {
-            usuarioClienteCollection = await reincardbService.GetUsuarioCliente(new Query { Filter = $@"i => i.AspNetUserId.Contains(@0)", FilterParameters = new object[] { search }, Expand = "Cliente,Usuario,Aspnetusers" });
+            //usuarioClienteCollection = await reincardbService.GetUsuarioCliente(new Query { Filter = $@"i => i.AspNetUserId.Contains(@0)", FilterParameters = new object[] { search }, Expand = "Cliente,Usuario,Aspnetusers" });
+            usuarioClienteCollection = await reincardbService.GetUsuarioCliente(new Query { Filter = $@"i => i.Id_Usuario == null",Expand = "Cliente,Usuario,Aspnetusers" });
         }
 
         protected async Task AddButtonClick(MouseEventArgs args)

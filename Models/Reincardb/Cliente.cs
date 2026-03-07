@@ -21,6 +21,8 @@ namespace Reincarapp.Models.reincardb
 
         public long? id_tipo_cliente { get; set; }
 
+        public TipoCliente TipoCliente { get; set; }
+
         [MaxLength(255)]
         public string sp_ins { get; set; }
 

@@ -23,5 +23,7 @@ namespace Reincarapp.Models.reincardb
 
         [MaxLength(95)]
         public string CreatedBy { get; set; }
+
+        public Aspnetusers Aspnetusers { get; set; }
     }
 }

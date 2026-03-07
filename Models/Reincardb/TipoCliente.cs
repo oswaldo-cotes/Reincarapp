@@ -14,5 +14,7 @@ namespace Reincarapp.Models.reincardb
 
         [MaxLength(80)]
         public string nombre { get; set; }
+
+        public ICollection<Cliente> Cliente { get; set; }
     }
 }

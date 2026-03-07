@@ -263,6 +263,13 @@ namespace Reincarapp.Data
               .HasPrincipalKey(i => i.Id_Tipo_Clasificacion_Adicional)
               .OnDelete(DeleteBehavior.ClientNoAction);
 
+            builder.Entity<Reincarapp.Models.reincardb.Cliente>()
+              .HasOne(i => i.TipoCliente)
+              .WithMany(i => i.Cliente)
+              .HasForeignKey(i => i.id_tipo_cliente)
+              .HasPrincipalKey(i => i.id_tipo_cliente)
+              .OnDelete(DeleteBehavior.ClientNoAction);
+
             builder.Entity<Reincarapp.Models.reincardb.ClienteDeuda>()
               .HasOne(i => i.Asignacion)
               .WithMany(i => i.ClienteDeuda)
@@ -807,6 +814,13 @@ namespace Reincarapp.Data
               .WithMany(i => i.LogDatoPersona)
               .HasForeignKey(i => i.id_usuario)
               .HasPrincipalKey(i => i.Id_Usuario)
+              .OnDelete(DeleteBehavior.ClientNoAction);
+
+            builder.Entity<Reincarapp.Models.reincardb.Logapp>()
+              .HasOne(i => i.Aspnetusers)
+              .WithMany(i => i.Logapp)
+              .HasForeignKey(i => i.CreatedBy)
+              .HasPrincipalKey(i => i.Id)
               .OnDelete(DeleteBehavior.ClientNoAction);
 
             builder.Entity<Reincarapp.Models.reincardb.MCita>()

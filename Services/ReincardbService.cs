@@ -4822,6 +4822,7 @@ namespace Reincarapp
         {
             var items = Context.Cliente.AsQueryable();
 
+            items = items.Include(i => i.TipoCliente);
 
             if (query != null)
             {
@@ -4852,6 +4853,7 @@ namespace Reincarapp
                               .AsNoTracking()
                               .Where(i => i.Id_Cliente == idcliente);
 
+            items = items.Include(i => i.TipoCliente);
  
             OnGetClienteByIdCliente(ref items);
 
@@ -11600,6 +11602,7 @@ namespace Reincarapp
         {
             var items = Context.Logapp.AsQueryable();
 
+            items = items.Include(i => i.Aspnetusers);
 
             if (query != null)
             {
@@ -11630,6 +11633,7 @@ namespace Reincarapp
                               .AsNoTracking()
                               .Where(i => i.IdLogApp == idlogapp);
 
+            items = items.Include(i => i.Aspnetusers);
  
             OnGetLogappByIdLogApp(ref items);
 

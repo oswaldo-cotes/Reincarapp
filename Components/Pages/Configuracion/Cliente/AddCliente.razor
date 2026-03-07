@@ -19,10 +19,13 @@
                     <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cliente.Nombre_Cliente" Name="Nombre_Cliente" />
               </ChildContent>
             </RadzenFormField>
-            <RadzenFormField Text="activo" Variant="Variant.Text">
-                  <ChildContent>
-                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@cliente.Activo" Name="activo" />
-              </ChildContent>
+
+
+            <RadzenFormField Text="" Variant="Variant.Text" style="width: 50px">
+                   <ChildContent>
+                        <RadzenSwitch Value="@(cliente.Activo == "1")"
+                                      Change="@(args => cliente.Activo = args ? "1" : "0")" />
+                    </ChildContent>
             </RadzenFormField>
 
             <RadzenFormField Text="Tipo Cliente" Variant="Variant.Text">
@@ -56,7 +59,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        cliente = new Reincarapp.Models.reincardb.Cliente();
+        cliente = new Reincarapp.Models.reincardb.Cliente() { Activo="1",tabla = "Cliente_Deuda_Dato"};
 
         tipoClientesForidTipoCliente = await reincardbService.GetTipoCliente();
     }

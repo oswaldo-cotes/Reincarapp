@@ -33,8 +33,17 @@
             <Columns>
                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Cliente" Property="Nombre_Cliente" Title="Nombre Cliente">
                 </RadzenDataGridColumn>
+                
+                
                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Cliente" Property="activo" Title="activo">
+
+                        <Template Context="cliente">
+                            <RadzenSwitch Value="@(cliente.Activo == "1")" Disabled="true" />
+                        </Template>
+
                 </RadzenDataGridColumn>
+
+
                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Cliente" Property="sp_ins" Title="spins">
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Cliente" Property="TipoCliente.nombre" Title="Tipo Cliente">
