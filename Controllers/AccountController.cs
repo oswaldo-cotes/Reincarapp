@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Reincarapp.Data;
 using Reincarapp.Models;
+using Reincarapp.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,29 +27,38 @@ namespace Reincarapp.Controllers
         private readonly IConfiguration configuration;
         private readonly reincardbContext2 reincardbContext2;
         private readonly reincardbContext reincardbContext;
+        private readonly IUserMigrationService userMigrationService;
 
-        public AccountController(IWebHostEnvironment env, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager, IConfiguration configuration, reincardbContext2 reincardbContext2, reincardbContext reincardbContext)
+        public AccountController(
+            IWebHostEnvironment env,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+            IConfiguration configuration,
+            reincardbContext2 reincardbContext2,
+            reincardbContext reincardbContext,
+            IUserMigrationService userMigrationService)
         {
-            this.signInManager = signInManager;
-            this.userManager = userManager;
-            this.roleManager = roleManager;
-            this.env = env;
-            this.configuration = configuration;
-            this.reincardbContext2 = reincardbContext2;
-            this.reincardbContext = reincardbContext;
+            this.signInManager          = signInManager;
+            this.userManager            = userManager;
+            this.roleManager            = roleManager;
+            this.env                    = env;
+            this.configuration          = configuration;
+            this.reincardbContext2       = reincardbContext2;
+            this.reincardbContext        = reincardbContext;
+            this.userMigrationService   = userMigrationService;
         }
 
         private IActionResult RedirectWithError(string error, string redirectUrl = null)
         {
-             if (!string.IsNullOrEmpty(redirectUrl))
-             {
-                 return Redirect($"~/Login?error={error}&redirectUrl={Uri.EscapeDataString(redirectUrl.Replace("~", ""))}");
-             }
-             else
-             {
-                 return Redirect($"~/Login?error={error}");
-             }
+            if (!string.IsNullOrEmpty(redirectUrl))
+            {
+                return Redirect($"~/Login?error={error}&redirectUrl={Uri.EscapeDataString(redirectUrl.Replace("~", ""))}");
+            }
+            else
+            {
+                return Redirect($"~/Login?error={error}");
+            }
         }
 
         [HttpGet]
@@ -65,63 +75,59 @@ namespace Reincarapp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string userName, string password, string redirectUrl)
         {
-            redirectUrl = string.IsNullOrEmpty(redirectUrl) ? "~/" : redirectUrl.StartsWith("/") ? redirectUrl : $"~/{redirectUrl}";
+            redirectUrl = string.IsNullOrEmpty(redirectUrl)
+                ? "~/"
+                : redirectUrl.StartsWith("/") ? redirectUrl : $"~/{redirectUrl}";
 
             if (env.EnvironmentName == "Development" && userName == "admin" && password == "admin")
             {
-                var claims = new List<Claim>()
+                var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, "admin"),
                     new Claim(ClaimTypes.Email, "admin")
                 };
 
                 roleManager.Roles.ToList().ForEach(r => claims.Add(new Claim(ClaimTypes.Role, r.Name)));
-                await signInManager.SignInWithClaimsAsync(new ApplicationUser { UserName = userName, Email = userName }, isPersistent: false, claims);
+                await signInManager.SignInWithClaimsAsync(
+                    new ApplicationUser { UserName = userName, Email = userName },
+                    isPersistent: false,
+                    claims);
 
                 return Redirect(redirectUrl);
             }
 
-            if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(password))
+                    if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                return RedirectWithError("Invalid user or password", redirectUrl);
+
+            // Step 1 — Attempt normal sign-in against the current Identity store.
+            var result = await signInManager.PasswordSignInAsync(userName, password, false, false);
+
+            // Step 2 — If sign-in failed, attempt legacy migration and retry once.
+            if (!result.Succeeded)
             {
+                var migration = await userMigrationService.MigrateUserAsync(
+                    userName, password, HttpContext.RequestAborted);
 
-
-                //if (!reincardbContext.Aspnetusers.Where(x => x.UserName == userName).Any()) { 
-                //    // usuario no migrado
-                //    var user = reincardbContext2.Usuario
-                //                                .Include(x=>x.UsuarioRol)
-                //                                .Include(x=>x.UsuarioCliente)
-                //                                .Where(x => x.Usuario1 == userName)
-                //                                .FirstOrDefault();
-                //    if (user != null) { 
-                    
-                    
-                //    }
-                //    else{ 
-                    
-                //    }
-
-
-                //}
-
-
-                var result = await signInManager.PasswordSignInAsync(userName, password, false, false);
-
-                if (result.Succeeded)
+                if (migration.Success)
                 {
-                    return Redirect(redirectUrl);
+                    // User was found and migrated (or was already present).
+                    // Retry sign-in with the same credentials.
+                    result = await signInManager.PasswordSignInAsync(userName, password, false, false);
                 }
             }
 
+            if (result.Succeeded)
+                return Redirect(redirectUrl);
+
             return RedirectWithError("Invalid user or password", redirectUrl);
         }
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
         {
             if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword))
-            {
                 return BadRequest("Invalid password");
-            }
 
             var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -129,12 +135,9 @@ namespace Reincarapp.Controllers
             var result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
 
             if (result.Succeeded)
-            {
                 return Ok();
-            }
 
             var message = string.Join(", ", result.Errors.Select(error => error.Description));
-
             return BadRequest(message);
         }
 
@@ -152,7 +155,6 @@ namespace Reincarapp.Controllers
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
-
             return Redirect("~/");
         }
     }
