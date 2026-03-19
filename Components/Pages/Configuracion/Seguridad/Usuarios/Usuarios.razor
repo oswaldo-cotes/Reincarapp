@@ -33,7 +33,7 @@
             Data="@usuarios"    TItem="Reincarapp.Models.reincardb.Usuario" RowDoubleClick="@EditRow" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" >
             <Columns>
 
-                <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center" Title="Migrar a nueva version?">
+               @*  <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center" Title="Migrar a nueva version?">
                     <Template Context="usuario">
 
                         <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="fiber_new" Size="ButtonSize.Medium"
@@ -42,7 +42,7 @@
                                           Visible=@(!applicationUsers.Any(x=>x.UserName == usuario.Usuario1 || x.Email == usuario.Correo_Electronico)) 
                                           />
                     </Template>
-                </RadzenDataGridColumn>
+                </RadzenDataGridColumn> *@
 
                 <RadzenDataGridColumn TItem="Reincarapp.Models.reincardb.Usuario" Property="Nombre_Usuario" Title="Nombre Usuario">
                 </RadzenDataGridColumn>
@@ -120,14 +120,14 @@
 
         await grid0.GoToPage(0);
 
-        usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Nombre_Usuario.Contains(@0) || i.Usuario1.Contains(@0) || i.Correo_Electronico.Contains(@0) || i.Cedula.Contains(@0) ", FilterParameters = new object[] { search }, Expand = "EstadoUsuario,UsuarioClientes,UsuarioRols" });
+        usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Nombre_Usuario.Contains(@0) || i.Usuario1.Contains(@0) || i.Correo_Electronico.Contains(@0) || i.Cedula.Contains(@0) ", FilterParameters = new object[] { search }, Expand = "EstadoUsuario,UsuarioCliente,UsuarioCliente.Cliente,UsuarioRol,UsuarioRol.Rol" });
     }
 
     List<ApplicationUser> applicationUsers  = new List<ApplicationUser>();
 
     protected override async Task OnInitializedAsync()
     {
-        usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Nombre_Usuario.Contains(@0) || i.Usuario1.Contains(@0) || i.Correo_Electronico.Contains(@0) || i.Cedula.Contains(@0) ", FilterParameters = new object[] { search }, Expand = "EstadoUsuario,UsuarioClientes,UsuarioClientes.Cliente,UsuarioRols,UsuarioRols.Rol" });
+        usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Nombre_Usuario.Contains(@0) || i.Usuario1.Contains(@0) || i.Correo_Electronico.Contains(@0) || i.Cedula.Contains(@0) ", FilterParameters = new object[] { search }, Expand = "EstadoUsuario,UsuarioCliente,UsuarioCliente.Cliente,UsuarioRol,UsuarioRol.Rol" });
         applicationUsers = (await Security.GetUsers()).ToList();
     }
 

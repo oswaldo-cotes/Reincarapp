@@ -1,4 +1,6 @@
 @page "/gestionar-deuda"
+@using Microsoft.EntityFrameworkCore
+@using Reincarapp.Data
 
 @attribute [Authorize]
 @inject IJSRuntime JSRuntime
@@ -7,6 +9,9 @@
 @inject ContextMenuService ContextMenuService
 @inject TooltipService TooltipService
 @inject NotificationService NotificationService
+
+@inject IDbContextFactory<reincardbContext> dbContextFactory
+
 
 @* @using System.Reflection
 @using Microsoft.AspNetCore.Authorization
@@ -19,40 +24,41 @@
 <PageTitle>GestionarDeuda</PageTitle>
 <RadzenRow Gap="30" >
     <RadzenColumn Size="4">
-        <RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));height: 700px; overflow-y: auto;">
-            <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Informacion</strong></RadzenText>
-            <RadzenRow RowGap="0">
 
-                @foreach (var value in values)
-                {
-                    foreach (var v in value)
-                    {
-
-                        <RadzenColumn SizeSM="6">
-                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">@(v.Key)</RadzenText>
-                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(v.Value)</b></RadzenText>
-                        </RadzenColumn>
-
-                       @*  <RadzenDataGridColumn TItem="IDictionary<string, object>" Title="@v.Key">
-                            <Template>
-                                @(v.Value)
-                            </Template>
-                        </RadzenDataGridColumn> *@
-                    }
-
-                }
+         <RadzenTabs  RenderMode="TabRenderMode.Server" >
+            <Tabs>
 
 
-                @* @foreach (PropertyInfo prop in registro.ClienteDeudaDatos.ToList()[0].GetType().GetProperties())
-                {
-                    <RadzenColumn SizeSM="6">
-                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">@(prop.Name)</RadzenText>
-                            <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(prop.GetValue(registro, null) == null ? "" : prop.GetValue(registro, null).ToString())</b></RadzenText>
-                    </RadzenColumn>
-                } *@
+          
 
-            </RadzenRow>
-        </RadzenCard>
+        @foreach (var value in values)
+        {
+            <RadzenTabsItem Text="Informacion" >
+                    
+                <RadzenCard class="rz-background-color-primary-light rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));height: 700px; overflow-y: auto;">
+                    <RadzenText TextStyle="TextStyle.H6" class="rz-color-on-primary-light"><strong>Informacion</strong></RadzenText>
+                    <RadzenRow RowGap="0">
+                
+                            @foreach (var v in value)
+                            {
+                                <RadzenColumn SizeSM="6">
+                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-color-on-primary-light rz-display-flex rz-mt-4 rz-mb-0">@(v.Key)</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1" class="rz-color-on-primary-light"><b>@(v.Value)</b></RadzenText>
+                                </RadzenColumn>
+                            }
+                
+                    </RadzenRow>
+                </RadzenCard>
+            </RadzenTabsItem>
+        }
+
+            </Tabs>
+        </RadzenTabs>
+
+
+
+
+
     </RadzenColumn>
 
     <RadzenColumn Size="8">
@@ -105,8 +111,12 @@
 
     List<Dictionary<string, object>> values = new List<Dictionary<string, object>>();
 
+    List<Dictionary<string, object>> otherValues = new List<Dictionary<string, object>>();
+
     int size = 6;
     bool addEvento = false;
+
+  
 
     async void ChildFiredEvent(Reincarapp.Models.reincardb.DatoPersona persona)
     {
@@ -124,13 +134,34 @@
         // EnabledDisabledParent(true);
     }
 
-    protected override Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
     {
+        var startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        var endDate = startDate.AddMonths(1).AddDays(-1);
         ClienteDeudaId = registro.Id_Cliente_Deuda; //long.Parse(registro.GetType().GetProperty("id_cliente_deuda").GetValue(registro, null).ToString());
 
-        values.Add(JsonConvert.DeserializeObject<Dictionary<string, object>>(registro.ClienteDeudaDato.ToList()[0].Dato));
+        var clienteDeudaDato = registro.ClienteDeudaDato.ToList()[0];
 
-        return base.OnInitializedAsync();
+        using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var registros = await context.ClienteDeudaDato
+            .AsNoTracking()
+           
+            .Where(x => x.Id != clienteDeudaDato.Id && x.Id_Cliente_Deuda == ClienteDeudaId &&
+                   x.Fecha_Final == null &&
+                   x.Fecha_Inicial >= startDate &&
+                   x.Fecha_Inicial <= endDate).ToListAsync();
+
+
+
+        values.Add(JsonConvert.DeserializeObject<Dictionary<string, object>>(clienteDeudaDato.Dato));
+
+        foreach (var item in registros)
+        {
+            values.Add(JsonConvert.DeserializeObject<Dictionary<string, object>>(item.Dato));
+        }
+
+       
     }
 
 }

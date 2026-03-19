@@ -279,7 +279,7 @@
 
             Reincarapp.Models.reincardb.Usuario usuario = null;
 
-            if (usuariosForIdUsuario?.ToList().Count == 1)
+            if (usuariosForIdUsuario?.ToList().Count > 0)
             {
                 usuario = usuariosForIdUsuario.FirstOrDefault();
                 Logger.LogInformation("Usuario encontrado: IdUsuario: {IdUsuario}", usuario.Id_Usuario);

@@ -54,10 +54,17 @@ namespace Reincarapp
             }
             var usuarios = await reincardbService.GetUsuario(new Query { Filter = $@"i => i.Usuario1 == @0 || i.Correo_Electronico == @0", FilterParameters = new object[] { User.UserName }, Expand = "UsuarioCliente,UsuarioCliente.Cliente,UsuarioRol" });
 
-            if (usuarios.Count() == 1)
-                return usuarios.FirstOrDefault();
-            else
+            if (usuarios.Count() > 0) {
+                var usuarioCliente = (await reincardbService.GetUsuarioCliente(new Query { Filter = $@"i => i.AspNetUserId == @0", FilterParameters = new object[] { User.Id }, Expand = "Usuario" })).ToList();
+                var usuario = usuarios.FirstOrDefault();
+                usuario.UsuarioCliente = usuarioCliente;
+                return usuario;
+            }
+            else {
+                  //
+                  //return new Usuario { Nombre_Usuario = User.Name, Usuario1 = User.UserName, Correo_Electronico = User.Email,UsuarioCliente = usuarioCliente };
                 return null;
+            }
         }
 
 

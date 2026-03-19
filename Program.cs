@@ -27,6 +27,7 @@ builder.Services.AddScoped<Reincarapp.TodoItemService>();
 builder.Services.AddScoped<DatoPersonaSyncService>();
 builder.Services.AddScoped<ILogAppService, LogAppService>();
 builder.Services.AddScoped<Reincarapp.Services.IUserMigrationService, Reincarapp.Services.UserMigrationService>();
+builder.Services.AddScoped<Reincarapp.Services.IUsuarioClienteSyncService, Reincarapp.Services.UsuarioClienteSyncService>(); // ← nueva línea
 // DbContextFactory para operaciones concurrentes (reemplaza AddDbContext)
 builder.Services.AddDbContextFactory<Reincarapp.Data.reincardbContext>(options =>
 {

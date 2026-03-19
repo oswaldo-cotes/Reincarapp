@@ -15,8 +15,8 @@
                         <ChildContent>
 
                             <RadzenProfileMenuItem Path="profile" Icon="settings" Text="Profile" />
-                            <RadzenProfileMenuItem Path="application-users" Icon="person" Text="Users" />
-                            <RadzenProfileMenuItem Path="application-roles" Icon="security" Text="Roles" />
+                            <RadzenProfileMenuItem Path="application-users" Icon="person" Text="Users" Visible="@Security.IsInRole(new string[] { "Administrador" })" />
+                            <RadzenProfileMenuItem Path="application-roles" Icon="security" Text="Roles" Visible="@Security.IsInRole(new string[] { "Administrador" })" />
                             <RadzenProfileMenuItem Text="Logout" Value="Logout" Icon="power_settings_new" />
                         </ChildContent>
                         <Template>
@@ -43,14 +43,18 @@
 
         <RadzenPanelMenu>
             <RadzenPanelMenuItem Text="Home" Path="" />
-            <RadzenPanelMenuItem Text="Configuracion"Visible="@Security.IsInRole(new string[] { "Administrador" })">
+            <RadzenPanelMenuItem Text="Configuracion" Visible="@Security.IsInRole(new string[] { "Administrador" })">
                 <RadzenPanelMenuItem Text="Clientes" Path="clientes" />
-                <RadzenPanelMenuItem Text="Asignar CLientes a usuarios" Path="usuario-cliente2" />
+               @*  <RadzenPanelMenuItem Text="Asignar CLientes a usuarios" Path="usuario-cliente2" /> *@
                 <RadzenPanelMenuItem Text="Bases" Path="bases" />
                 <RadzenPanelMenuItem Text="Resultado Evento" Path="resultado-eventos" />
                 <RadzenPanelMenuItem Text="Tipo Comunicacion" Path="tipo-comunicacions" />
                 <RadzenPanelMenuItem Text="Clasificacion Adicional" Path="clasificacion-adicionals" />
-               
+              @*   <RadzenPanelMenuItem Text="Seguridad y Accesos" Path="">
+                    <RadzenPanelMenuItem Text="Usuarios" Path="usuarios" />
+                    <RadzenPanelMenuItem Text="Roles Usuarios" Path="usuario-rols" />
+                    <RadzenPanelMenuItem Text="Clientes Usuarios" Path="usuario-clientes" />
+                </RadzenPanelMenuItem> *@
             </RadzenPanelMenuItem>
       
             <RadzenPanelMenuItem Text="Personas" Path="personas" Visible="@Security.IsInRole(new string[] { "Administrador", "Consulta" })" />

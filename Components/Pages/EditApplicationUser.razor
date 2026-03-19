@@ -7,6 +7,9 @@
             <RadzenAlert Title="Cannot update user" Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
 
             <RadzenStack style="margin-bottom: 1rem;">
+
+                
+
                 <RadzenFormField Text="User name" Variant="Variant.Text">
                     <ChildContent>
                         <RadzenTextBox Disabled="true" style="width: 100%" @bind-Value="@(user.UserName)" Name="UserName" />
@@ -20,6 +23,11 @@
                 <RadzenFormField Text="Roles" Variant="Variant.Text">
                     <ChildContent>
                         <RadzenDropDown Data="@roles" Multiple="true" style="width: 100%" TextProperty="Name" @bind-Value="@(userRoles)" ValueProperty="Id" Name="Roles" />
+                    </ChildContent>
+                </RadzenFormField>
+                <RadzenFormField Text="Clientes" Variant="Variant.Text">
+                    <ChildContent>
+                        <RadzenDropDown Data="@clientes" Multiple="true" style="width: 100%" TextProperty="Nombre_Cliente" @bind-Value="@(userClientes)" ValueProperty="Id_Cliente" Name="Clientes" />
                     </ChildContent>
                 </RadzenFormField>
                 <RadzenFormField Text="Password" Variant="Variant.Text">
